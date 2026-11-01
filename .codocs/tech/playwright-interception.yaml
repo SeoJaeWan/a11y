@@ -1,0 +1,37 @@
+_codocs:
+  id: playwright-interception
+  name: Playwright 가로채기
+  parent:
+    - Journey A11y
+개요: |
+  기존 테스트 코드를 고치지 않고, 테스트가 호출하는 Playwright 동작(click, fill, expect 등)을 접근 모드별 실행·관찰로 바꾸는 메커니즘과 그 확인 결과를 설명한다.
+  2026-10~11 Playwright 1.64.1, Chromium, Node 24에서 실측으로 확인한 사실이다. 사용자는 설정 파일 하나에 project를 추가하고 테스트 import는 바꾸지 않는다.
+확장 지점: |
+  - Test Fixtures(`test.extend`): 내장 page fixture를 재정의해 접근 모드용 환경을 제공한다.
+  - Test Projects: 일반 실행과 접근 모드 실행을 구분한다(예: `--project=keyboard-a11y`).
+  - Custom Reporter: 단계별 결과를 수집하고 출력한다. Reporter는 결과 수집만 하며 동작을 바꿀 수 없다. Reporter는 메인 프로세스에서 돌아 page에 접근할 수 없으므로 관찰은 워커 쪽에서 해야 한다.
+가로채기 방식: |
+  Page나 Locator를 Proxy로 감쌀 필요 없이 프로토타입의 메서드를 패치한다.
+  - Locator의 click, dblclick, hover, check, tap, selectOption, dragTo와 `page.click` 계열은 모두 클라이언트 `Frame.prototype`으로 모인다. Frame 단계에서는 selector 문자열만 받으므로 `frame.locator(selector)`로 다시 만든다. page.click은 기본적으로 strict가 아니므로 차이를 고려해야 한다.
+  - `page.mouse`는 `Mouse.prototype`을 패치하고 `elementFromPoint`로 대상을 추정한다.
+  - `ElementHandle.click`은 별도 경로로 잡히지 않는다.
+  - expect matcher는 내부에서 `_expect`(비공개)를 호출하므로 이를 감싸면 assertion 시점에 관찰을 실행할 수 있다. `check()`와 `toHaveValue`는 Locator.click을 호출하지 않았다.
+  - 패치는 워커 프로세스 전체에 적용된다. a11y project의 워커에만 설치해 일반 테스트에 영향을 주지 않는다.
+  - 대체 실행 안에서 원본 메서드를 다시 부를 때는 AsyncLocalStorage 가드로 재귀를 막는다.
+단계 보고: |
+  - 일반 project는 평소와 같다.
+  - a11y project는 `test.step(title, fn, { box: true, location })`으로 요약 단계를 만든다. 호출 위치는 Error stack에서 얻어 공개 `location` 옵션으로 넘기며 사용자 테스트 줄을 가리킨다.
+  - `step.attach`로 기록을 단계에 붙이고 리포터의 `TestStep.attachments`와 `result.attachments`에서 읽는다.
+  - 평소 `page.keyboard.press`는 Tab마다 단계를 만들므로 요약 단계 아래가 길어진다. CDP로 키를 보내면 Tab 자체는 단계를 만들지 않고, Tab과 Shift+Tab 순서, trusted 이벤트, 키보드 click 활성화(detail=0)가 정상이었다.
+  - `box: true`는 자식 단계를 숨기지 않는다. 리포트의 Tab 줄은 자식 test.step으로 기록을 보여 주는 것이다.
+  - 같은 테스트를 짝지을 때 testId는 project마다 달라서 쓰지 않고 파일과 제목 경로를 쓴다. 호출 위치와 순번은 단계 구분에 쓸 수 있다.
+내부 API 의존: |
+  constructor.prototype 접근, `_expect`, `use`의 fixture 함수는 공개 계약이 아니다. Playwright 버전마다 깨질 수 있으므로 peerDependency 범위를 명시하고 버전별 스모크 테스트로 감시해야 한다.
+  `_instrumentation`, `_wrapApiCall`, `setBoxedStackPrefixes`도 동작을 확인했지만 현재 구성에서는 필수가 아니다.
+  TypeScript에서 prototype은 any라 타입 안전성이 없으므로 자체 인터페이스를 선언하는 것이 좋다.
+도입 방식: |
+  설정 파일 하나에 `projects: [{ name: 'chromium' }, ...a11yProjects()]`처럼 project를 추가한다. 별도 설정 파일을 두지 않고 테스트 파일의 import도 바꾸지 않는다.
+
+  설정 파일을 평가할 때 워커는 자기 project를 알 수 없으므로 첫 지점은 fixture다. a11y project의 `use`에 fixture 함수를 넣어 그 워커에서만 패치를 설치했고, `workers: 1`에서도 project별 워커가 분리되었다. 일반 project의 reporter 단계, HTML 단계, trace 액션 목록은 패키지가 없을 때와 정규화 비교로 같았다.
+  패치만 설치하고 그대로 통과시키면 일반 실행의 단계 위치가 바뀌고, auto fixture는 단계가 추가되므로 일반 project에는 어느 쪽도 두지 않는다.
+  `use`에 fixture 함수를 넣는 방식은 문서화되지 않아 업그레이드 시 깨질 수 있다. 실제 패키지는 사용자의 `testIdAttribute` 값을 유지해야 한다.
