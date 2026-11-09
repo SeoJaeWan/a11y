@@ -30,7 +30,8 @@
     "test": "vitest run",
     "prepare": "husky",
     "lint:package": "pnpm build && publint --strict && attw --pack . --profile esm-only",
-    "knip": "knip"
+    "knip": "knip",
+    "dev:app": "vite --config test/app/vite.config.ts"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.54 <2"
@@ -44,6 +45,9 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "1.65.0",
     "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^10.14.0",
     "eslint-plugin-check-file": "^3.3.2",
     "eslint-plugin-jsdoc": "^65.4.5",
@@ -54,6 +58,8 @@
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "publint": "^0.3.25",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "tsdown": "0.23.7",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",

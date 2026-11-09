@@ -24,6 +24,30 @@ const NO_INTERNAL_ACCESS = [
   },
 ];
 
+const NAMING = [
+  { selector: 'default', format: ['camelCase'], leadingUnderscore: 'forbid' },
+  { selector: 'variable', modifiers: ['const'], format: ['camelCase', 'UPPER_CASE'] },
+  {
+    selector: ['variable', 'parameter'],
+    types: ['boolean'],
+    format: ['PascalCase'],
+    prefix: ['is', 'has', 'can', 'should'],
+  },
+  { selector: 'typeLike', format: ['PascalCase'] },
+  { selector: 'import', format: null },
+  { selector: 'variable', modifiers: ['destructured'], format: null },
+  // Object keys often follow outside shapes (configs, headers, ARIA).
+  { selector: ['objectLiteralProperty', 'objectLiteralMethod'], format: null },
+  { selector: 'typeProperty', modifiers: ['requiresQuotes'], format: null },
+];
+
+// React components and their props use PascalCase.
+const REACT_NAMING = [
+  { selector: 'function', format: ['camelCase', 'PascalCase'] },
+  { selector: 'variable', modifiers: ['const'], format: ['camelCase', 'UPPER_CASE', 'PascalCase'] },
+  { selector: 'typeProperty', format: ['camelCase', 'PascalCase'] },
+];
+
 export default defineConfig(
   {
     ignores: ['dist/', 'node_modules/', '.codocs/', 'test-results/', 'playwright-report/'],
@@ -56,23 +80,7 @@ export default defineConfig(
         { fixStyle: 'separate-type-imports' },
       ],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
-      '@typescript-eslint/naming-convention': [
-        'error',
-        { selector: 'default', format: ['camelCase'], leadingUnderscore: 'forbid' },
-        { selector: 'variable', modifiers: ['const'], format: ['camelCase', 'UPPER_CASE'] },
-        {
-          selector: ['variable', 'parameter'],
-          types: ['boolean'],
-          format: ['PascalCase'],
-          prefix: ['is', 'has', 'can', 'should'],
-        },
-        { selector: 'typeLike', format: ['PascalCase'] },
-        { selector: 'import', format: null },
-        { selector: 'variable', modifiers: ['destructured'], format: null },
-        // Object keys often follow outside shapes (configs, headers, ARIA).
-        { selector: ['objectLiteralProperty', 'objectLiteralMethod'], format: null },
-        { selector: 'typeProperty', modifiers: ['requiresQuotes'], format: null },
-      ],
+      '@typescript-eslint/naming-convention': ['error', ...NAMING],
       'func-style': ['error', 'declaration'],
       'no-restricted-syntax': [
         'error',
@@ -132,6 +140,12 @@ export default defineConfig(
     files: ['*.config.ts', 'test/**/*.config.ts'],
     rules: {
       'no-restricted-syntax': ['error', NO_INLINE_TYPE_IMPORT, ...NO_INTERNAL_ACCESS],
+    },
+  },
+  {
+    files: ['test/app/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/naming-convention': ['error', ...REACT_NAMING, ...NAMING],
     },
   },
   {
