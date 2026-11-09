@@ -53,4 +53,9 @@ _codocs:
 
   설정 파일을 평가할 때 워커는 자기 project를 알 수 없으므로 첫 지점은 fixture다. a11y project의 `use`에 fixture 함수를 넣어 그 워커에서만 패치를 설치했고, `workers: 1`에서도 project별 워커가 분리되었다. 일반 project의 reporter 단계, HTML 단계, trace 액션 목록은 패키지가 없을 때와 정규화 비교로 같았다.
   패치만 설치하고 그대로 통과시키면 일반 실행의 단계 위치가 바뀌고, auto fixture는 단계가 추가되므로 일반 project에는 어느 쪽도 두지 않는다.
-  `use`에 fixture 함수를 넣는 방식은 문서화되지 않아 업그레이드 시 깨질 수 있다. 실제 패키지는 사용자의 `testIdAttribute` 값을 유지해야 한다.
+  `use`에 fixture 함수를 넣는 방식은 문서화되지 않아 업그레이드 시 깨질 수 있다.
+
+  설치 장치가 `testIdAttribute` 칸을 빌리므로 사용자의 test id 이름을 그대로 돌려준다. 테스트가 시작될 때 사용자 설정 파일(`testInfo.config.configFile`, 워커에 이미 읽혀 있음)에서 값 하나를 정한다. 순서는 Playwright와 같이 이어받은 프로젝트의 값, 최상위 `use`의 값, 기본값 `data-testid`다. 요소를 찾을 때 여러 이름으로 다시 시도하지 않는다. 원래 실행에서 못 찾는 요소를 접근성 실행에서만 찾게 되기 때문이다. 2026-11 결정이다.
+  - 2026-11 실측: 최상위 `data-qa`, chromium 프로젝트에만 `data-qa`, 설정 없음 세 경우 모두 접근성 실행의 `getByTestId`가 원래 실행과 같은 요소를 찾았다.
+  - 다른 칸(`serviceWorkers`)도 동작했지만, API 모킹 도구(MSW)를 쓰는 사용자가 바꾸는 설정이라 쓰지 않는다.
+  - 한계: 테스트 코드에서 `selectors.setTestIdAttribute()`로 바꾼 값은 설정 파일에 없어 알 수 없다.

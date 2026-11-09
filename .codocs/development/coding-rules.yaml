@@ -1,0 +1,39 @@
+_codocs:
+  id: coding-rules
+  name: 코드 작성 규칙
+  parent:
+    - Journey A11y
+개요: |
+  코드를 쓰고 검사하는 규칙이다. 사용자의 블로그 저장소(seojaewan-blog)의 규칙을 기본으로 가져오고, 패키지에 맞지 않는 것을 빼고 패키지에 필요한 것을 더한다. 2026-11 결정이다.
+  규칙은 가능한 한 도구(TypeScript, ESLint, Prettier, commitlint, Git 훅)로 강제하고, 도구로 강제하지 못하는 것만 리뷰에서 본다. 세부 설정은 설정 파일을 만들며 영역별로 정하고 동작을 확인한다.
+가져오는 규칙: |
+  | 영역 | 규칙 | 강제 도구 |
+  |---|---|---|
+  | 포맷 | 작은따옴표, 세미콜론, 끝 쉼표, 100자, 2칸, LF 고정, `.codocs` 제외 | Prettier, `.gitattributes` |
+  | 예외 처리 | `eslint-disable` 주석 금지, 예외는 설정 파일에서 경로 단위 | `noInlineConfig`, `--max-warnings=0` |
+  | 타입 | `strictTypeChecked`, `type`만 사용, `any` 금지, Promise 무시 금지, 공개 함수 반환 타입 명시 | typescript-eslint, `strict`·`noUncheckedIndexedAccess` |
+  | 이름 | 변수·함수 camelCase, 타입 PascalCase, 상수 UPPER_SNAKE_CASE, boolean은 `is`·`has`·`can`·`should` | `naming-convention` |
+  | 함수 | 이름 있는 함수는 `function` 선언, 콜백만 화살표 함수 | `func-style` |
+  | import·export | named export만, 자동 정렬, `import type` 분리 | `simple-import-sort` |
+  | 파일 | kebab-case, `utils`·`helpers` 같은 이름 금지, `index`는 패키지 진입점에만 | `check-file` |
+  | JSDoc | 모든 함수에 설명, `@param` 설명 필수, 타입은 적지 않음 | `eslint-plugin-jsdoc` |
+  | 커밋 | Conventional Commits, 제목 영어, 본문 한국어 | commitlint |
+  | 브랜치 | `종류/짧은-설명` | pre-push 훅, CI |
+  | Git 훅 | 커밋 때 바뀐 파일만 lint·포맷, 타입 검사, 관련 테스트 | husky, lint-staged |
+
+  React, Next.js, Tailwind, Storybook, Stylelint, 피그마, 기능 폴더 경계 규칙은 패키지에 해당 코드가 없어 가져오지 않는다.
+패키지 규칙: |
+  | 규칙 | 이유 | 강제 방법 |
+  |---|---|---|
+  | Playwright 내부 접근은 `src/playwright-internal/`에서만 | 버전이 바뀔 때 고칠 곳을 한곳에 모은다([[Playwright 가로채기:내부 API 의존]]) | 그 폴더 밖에서 `_`로 시작하는 속성 접근과 prototype 접근 금지 |
+  | 내부 API 타입은 그 폴더에서 직접 선언 | `any` 금지를 지키며 prototype을 다룬다 | `no-explicit-any` |
+  | 브라우저 안에서 도는 코드는 `src/page-scripts/` | `page.evaluate`로 보내는 함수는 바깥 변수를 쓸 수 없어, 섞이면 실행 중에야 깨진다 | 폴더별로 DOM 타입과 Node 타입 분리 |
+  | 공개 API는 `src/index.ts` 하나 | 내보낸 것은 모두 공개 약속이 된다 | `package.json`의 `exports` |
+  | 패키지 형식 검사 | npm에서 타입과 경로가 깨지지 않았는지 확인한다 | publint, are-the-types-wrong(CI) |
+  | 쓰지 않는 코드 검사 | 공개 패키지에 죽은 코드를 남기지 않는다 | knip |
+  | 런타임 의존성 최소화 | 사용자 설치 부담을 줄인다. Playwright는 peerDependency다 | 리뷰, publint |
+  | 버전 관리 | npm에 공개 배포한다 | Changesets |
+언어: |
+  - 공개 API의 JSDoc과 README는 영어로 쓴다. 오픈소스 사용자가 편집기에서 보는 설명이 JSDoc이기 때문이다.
+  - 커밋 본문과 `.codocs` 설계 문서는 한국어로 쓴다.
+  - 테스트 이름과 케이스 설명은 한국어로 쓴다. 리포트를 보고 결과물을 확인하는 사람이 읽기 위해서다([[테스트 작성 규칙]]).
