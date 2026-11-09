@@ -11,8 +11,8 @@ export type Condition = {
 export type RunSettings = {
   /** Playwright config to run the E2E with, relative to test/. Defaults to playwright.config.ts. */
   config?: string;
-  /** Extra environment variables. `A11Y` is set to `1` unless given here. */
-  env?: Record<string, string>;
+  /** Extra environment variables. `A11Y` is `1` unless given here; `null` removes a variable. */
+  env?: Record<string, string | null>;
 };
 
 type CaseBase = RunSettings & {

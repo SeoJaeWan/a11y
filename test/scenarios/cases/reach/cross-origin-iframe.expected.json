@@ -1,0 +1,135 @@
+{
+  "file": "cases/reach/cross-origin-iframe.spec.ts",
+  "title": ["결제 위젯으로 결제하고 주문 내역을 연다"],
+  "status": "passed",
+  "retry": 0,
+  "summary": {
+    "tabs": 6,
+    "unnamed": 0,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "click",
+      "target": "button \"결제하기\"",
+      "location": "cases/reach/cross-origin-iframe.spec.ts:7",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 5,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "link",
+            "name": "결제 약관",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": [],
+            "heading": "h2 카드 결제",
+            "frame": "iframe \"결제 위젯\"",
+            "isTarget": false
+          },
+          {
+            "index": 5,
+            "role": "button",
+            "name": "결제하기",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": [],
+            "heading": "h2 카드 결제",
+            "frame": "iframe \"결제 위젯\"",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "Enter",
+            "source": "role",
+            "nextStep": "continued",
+            "requests": []
+          }
+        ],
+        "ended": false
+      }
+    },
+    {
+      "action": "toHaveText",
+      "target": "status",
+      "location": "cases/reach/cross-origin-iframe.spec.ts:8"
+    },
+    {
+      "action": "click",
+      "target": "button \"주문 내역 보기\"",
+      "location": "cases/reach/cross-origin-iframe.spec.ts:9",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "button \"결제하기\"",
+        "path": {
+          "tab": 1,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "button",
+            "name": "주문 내역 보기",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 결제",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "Enter",
+            "source": "role",
+            "nextStep": "continued",
+            "requests": []
+          }
+        ],
+        "ended": false
+      }
+    },
+    {
+      "action": "toBeVisible",
+      "target": "heading \"주문 내역\"",
+      "location": "cases/reach/cross-origin-iframe.spec.ts:10"
+    }
+  ]
+}

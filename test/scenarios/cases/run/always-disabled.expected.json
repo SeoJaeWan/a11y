@@ -1,0 +1,23 @@
+{
+  "file": "cases/run/always-disabled.spec.ts",
+  "title": ["품절 상품은 장바구니에 담을 수 없다"],
+  "status": "passed",
+  "retry": 0,
+  "summary": {
+    "tabs": 0,
+    "unnamed": 0,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "toBeDisabled",
+      "target": "button \"장바구니 담기\"",
+      "location": "cases/run/always-disabled.spec.ts:7"
+    },
+    {
+      "action": "click",
+      "target": "button \"장바구니 담기\"",
+      "location": "cases/run/always-disabled.spec.ts:8"
+    }
+  ]
+}
