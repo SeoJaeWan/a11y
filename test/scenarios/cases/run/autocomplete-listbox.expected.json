@@ -1,0 +1,140 @@
+{
+  "file": "cases/run/autocomplete-listbox.spec.ts",
+  "title": ["도착 도시를 제안 목록에서 고른다"],
+  "status": "passed",
+  "retry": 0,
+  "summary": {
+    "tabs": 4,
+    "unnamed": 0,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "fill",
+      "target": "combobox \"도착 도시\"",
+      "location": "cases/run/autocomplete-listbox.spec.ts:6",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 4,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "combobox",
+            "name": "도착 도시",
+            "nameSource": "label",
+            "states": {
+              "required": false,
+              "expanded": false
+            },
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": true
+          }
+        ],
+        "attempts": [],
+        "ended": false
+      }
+    },
+    {
+      "action": "click",
+      "target": "option \"서산\"",
+      "location": "cases/run/autocomplete-listbox.spec.ts:7",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "combobox \"도착 도시\"",
+        "path": {
+          "tab": 0,
+          "arrow": 3
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "option",
+            "name": "서울",
+            "nameSource": "contents",
+            "states": {
+              "selected": true
+            },
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "option",
+            "name": "서귀포",
+            "nameSource": "contents",
+            "states": {
+              "selected": true
+            },
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "option",
+            "name": "서산",
+            "nameSource": "contents",
+            "states": {
+              "selected": true
+            },
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "Enter",
+            "source": "role",
+            "nextStep": "continued",
+            "requests": []
+          }
+        ],
+        "ended": false
+      }
+    },
+    {
+      "action": "toHaveText",
+      "target": "status",
+      "location": "cases/run/autocomplete-listbox.spec.ts:8"
+    }
+  ]
+}

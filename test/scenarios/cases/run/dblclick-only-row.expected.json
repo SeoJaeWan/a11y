@@ -1,0 +1,84 @@
+{
+  "file": "cases/run/dblclick-only-row.spec.ts",
+  "title": ["예약 상세를 연다"],
+  "status": "failed",
+  "retry": 1,
+  "summary": {
+    "tabs": 4,
+    "unnamed": 1,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "dblclick",
+      "target": "row",
+      "location": "cases/run/dblclick-only-row.spec.ts:6",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 4,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "row",
+            "name": "",
+            "nameSource": null,
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 예약 목록",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "Enter",
+            "source": "generic",
+            "nextStep": "not-continued",
+            "requests": []
+          },
+          {
+            "key": "Space",
+            "source": "generic",
+            "nextStep": "not-continued",
+            "requests": []
+          }
+        ],
+        "ended": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "file": "cases/run/declared-shortcut-broken.spec.ts",
+  "title": ["저장한 예약의 이름을 바꾸기 시작한다"],
+  "status": "flaky",
+  "retry": 1,
+  "summary": {
+    "tabs": 4,
+    "unnamed": 0,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "dblclick",
+      "target": "button \"가족 모임\"",
+      "location": "cases/run/declared-shortcut-broken.spec.ts:6",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 4,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "button",
+            "name": "가족 모임",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 저장한 예약",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "F2",
+            "source": "declared",
+            "nextStep": "not-continued",
+            "requests": []
+          },
+          {
+            "key": "Enter",
+            "source": "role",
+            "nextStep": "continued",
+            "requests": []
+          }
+        ],
+        "ended": false
+      }
+    },
+    {
+      "action": "toHaveValue",
+      "target": "textbox \"예약 이름\"",
+      "location": "cases/run/declared-shortcut-broken.spec.ts:7"
+    }
+  ]
+}

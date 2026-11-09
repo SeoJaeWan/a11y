@@ -1,0 +1,114 @@
+{
+  "file": "cases/info/landmarks-headings.spec.ts",
+  "title": ["예약에 쿠폰을 적용한다"],
+  "status": "passed",
+  "retry": 0,
+  "summary": { "tabs": 7, "unnamed": 0, "unreached": 0 },
+  "steps": [
+    {
+      "action": "fill",
+      "target": "textbox \"쿠폰 번호\"",
+      "location": "cases/info/landmarks-headings.spec.ts:6",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": { "tab": 6, "arrow": 0 },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "link",
+            "name": "환불 규정",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main", "complementary \"도움말\""],
+            "heading": "h2 자주 묻는 질문",
+            "isTarget": false
+          },
+          {
+            "index": 5,
+            "role": "button",
+            "name": "일정 변경",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main", "region \"예약 정보\""],
+            "heading": "h2 예약 정보",
+            "isTarget": false
+          },
+          {
+            "index": 6,
+            "role": "textbox",
+            "name": "쿠폰 번호",
+            "nameSource": "label",
+            "states": { "readonly": false, "required": false },
+            "landmarks": ["main", "region \"결제\"", "form \"쿠폰 등록\""],
+            "heading": "h3 쿠폰",
+            "isTarget": true
+          }
+        ],
+        "attempts": [],
+        "ended": false
+      }
+    },
+    {
+      "action": "click",
+      "target": "button \"쿠폰 적용\"",
+      "location": "cases/info/landmarks-headings.spec.ts:7",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "textbox \"쿠폰 번호\"",
+        "path": { "tab": 1, "arrow": 0 },
+        "stops": [
+          {
+            "index": 1,
+            "role": "button",
+            "name": "쿠폰 적용",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main", "region \"결제\"", "form \"쿠폰 등록\""],
+            "heading": "h3 쿠폰",
+            "isTarget": true
+          }
+        ],
+        "attempts": [{ "key": "Enter", "source": "role", "nextStep": "continued", "requests": [] }],
+        "ended": false
+      }
+    },
+    {
+      "action": "toHaveText",
+      "target": "status",
+      "location": "cases/info/landmarks-headings.spec.ts:8"
+    }
+  ]
+}

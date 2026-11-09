@@ -1,0 +1,93 @@
+{
+  "file": "cases/reach/data-qa-test-id.spec.ts",
+  "title": ["예약을 확정한다"],
+  "status": "passed",
+  "retry": 0,
+  "summary": {
+    "tabs": 5,
+    "unnamed": 0,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "click",
+      "target": "button \"예약 확정\"",
+      "location": "cases/reach/data-qa-test-id.spec.ts:6",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 5,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "button",
+            "name": "임시 저장",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 예약 확인",
+            "isTarget": false
+          },
+          {
+            "index": 5,
+            "role": "button",
+            "name": "예약 확정",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 예약 확인",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "Enter",
+            "source": "role",
+            "nextStep": "continued",
+            "requests": []
+          }
+        ],
+        "ended": false
+      }
+    },
+    {
+      "action": "toHaveText",
+      "target": "status",
+      "location": "cases/reach/data-qa-test-id.spec.ts:7"
+    }
+  ]
+}

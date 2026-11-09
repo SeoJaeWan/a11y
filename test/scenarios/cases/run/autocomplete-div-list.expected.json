@@ -1,0 +1,145 @@
+{
+  "file": "cases/run/autocomplete-div-list.spec.ts",
+  "title": ["도착 도시를 제안 목록에서 고른다"],
+  "status": "failed",
+  "retry": 0,
+  "summary": {
+    "tabs": 11,
+    "unnamed": 0,
+    "unreached": 1
+  },
+  "steps": [
+    {
+      "action": "fill",
+      "target": "textbox \"도착 도시\"",
+      "location": "cases/run/autocomplete-div-list.spec.ts:6",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 4,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "textbox",
+            "name": "도착 도시",
+            "nameSource": "label",
+            "states": {
+              "readonly": false,
+              "required": false
+            },
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": true
+          }
+        ],
+        "attempts": [],
+        "ended": false
+      }
+    },
+    {
+      "action": "click",
+      "target": "generic",
+      "location": "cases/run/autocomplete-div-list.spec.ts:7",
+      "keyboard": {
+        "reached": false,
+        "stoppedBy": "round",
+        "startFocus": "textbox \"도착 도시\"",
+        "path": {
+          "tab": 7,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "button",
+            "name": "검색",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 5,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 6,
+            "role": "textbox",
+            "name": "도착 도시",
+            "nameSource": "label",
+            "states": {
+              "readonly": false,
+              "required": false
+            },
+            "landmarks": ["main"],
+            "heading": "h1 항공권 검색",
+            "isTarget": false
+          }
+        ],
+        "attempts": [],
+        "ended": true
+      }
+    }
+  ]
+}

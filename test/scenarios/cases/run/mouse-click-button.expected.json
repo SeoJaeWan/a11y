@@ -1,0 +1,83 @@
+{
+  "file": "cases/run/mouse-click-button.spec.ts",
+  "title": ["지도에서 매장 핀을 눌러 주소를 본다"],
+  "status": "passed",
+  "retry": 0,
+  "summary": {
+    "tabs": 4,
+    "unnamed": 0,
+    "unreached": 0
+  },
+  "steps": [
+    {
+      "action": "mouse.click",
+      "target": "좌표 (300, 260) → button \"강남점\" (좌표로 추정)",
+      "location": "cases/run/mouse-click-button.spec.ts:7",
+      "keyboard": {
+        "reached": true,
+        "reachedBy": "self",
+        "startFocus": "body",
+        "path": {
+          "tab": 4,
+          "arrow": 0
+        },
+        "stops": [
+          {
+            "index": 1,
+            "role": "link",
+            "name": "홈",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner"],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 2,
+            "role": "link",
+            "name": "예약",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 3,
+            "role": "link",
+            "name": "내 정보",
+            "nameSource": "contents",
+            "states": {},
+            "landmarks": ["banner", "navigation \"주 메뉴\""],
+            "heading": null,
+            "isTarget": false
+          },
+          {
+            "index": 4,
+            "role": "button",
+            "name": "강남점",
+            "nameSource": "aria-label",
+            "states": {},
+            "landmarks": ["main"],
+            "heading": "h1 매장 찾기",
+            "isTarget": true
+          }
+        ],
+        "attempts": [
+          {
+            "key": "Enter",
+            "source": "role",
+            "nextStep": "continued",
+            "requests": []
+          }
+        ],
+        "ended": false
+      }
+    },
+    {
+      "action": "toHaveText",
+      "target": "status",
+      "location": "cases/run/mouse-click-button.spec.ts:8"
+    }
+  ]
+}
