@@ -147,6 +147,7 @@ jobs:
         with:
           name: scenario-report-${{ matrix.version }}
           path: test/.report
+          include-hidden-files: true
           retention-days: ${{ github.event_name == 'schedule' && 30 || 14 }}
       - name: 리포트 올리기 (고정 버전 통과)
         if: success() && matrix.isPinned
@@ -154,6 +155,7 @@ jobs:
         with:
           name: scenario-report-${{ matrix.version }}
           path: test/.report
+          include-hidden-files: true
           retention-days: 7
 
   scenarios-windows:
@@ -182,6 +184,7 @@ jobs:
         with:
           name: scenario-report-windows
           path: test/.report
+          include-hidden-files: true
           retention-days: 14
 
   scenario-results:
