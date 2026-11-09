@@ -201,7 +201,7 @@ CI 환경: |
   | 정적 검사, 버전별 시나리오 | Linux(`ubuntu-latest`) | [[코드 작성 규칙:CI 작업]] 전부 |
   | Windows 시나리오 | Windows | 고정 버전 하나로 시나리오만, PR마다. 결과는 `시나리오 결과`에 포함한다 |
 
-  - Linux: Playwright 공식 CI 예시가 모두 `ubuntu-latest`다.
+  - Linux: Playwright 공식 CI 예시가 모두 `ubuntu-latest`다. 다만 버전별 시나리오는 `ubuntu-24.04`로 고정한다. `ubuntu-latest`가 Ubuntu 26.04가 되면서 Playwright 1.60 이하는 "chromium-headless-shell on ubuntu26.04 지원 안 함"으로 설치에 실패했다(2026-11 CI 확인). 24.04 러너가 없어지면 그때 지원 하한을 다시 본다.
   - Windows: 도구가 사용자 설정 파일을 읽고 결과 파일과 trace를 저장해 경로 구분자 같은 Windows 전용 문제가 생기기 쉽고, 개발 환경도 Windows다. playwright-bdd도 Windows 전용 작업을 따로 둔다. 버전 전체를 Windows로 돌리면 시간만 늘어 하나만 둔다.
   - macOS는 Chromium만 지원하는 버전 1에서 두지 않는다.
 
