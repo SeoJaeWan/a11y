@@ -4,7 +4,9 @@ tree_before=$(git write-tree)
 
 pnpm typecheck
 
-staged_ts=$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx')
+# Unit tests live only in src/ and test/runner/, so only those files can have related tests.
+# Passing every staged file also overflows the Windows command line on large commits.
+staged_ts=$(git diff --cached --name-only --diff-filter=ACMR -- 'src/*.ts' 'test/runner/*.ts')
 if [ -n "$staged_ts" ]; then
   pnpm exec vitest related --run --passWithNoTests $staged_ts
 fi
