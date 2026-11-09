@@ -47,7 +47,33 @@ trace 포커스 표시: |
   위 내용은 작은 검증 페이지에서 확인했으며 블로그 E2E, Firefox·WebKit, 이 구성의 merge-reports와 재시도는 실행하지 않았다.
 JSON 기록: |
   실행이 끝나면 Playwright 리포트와 함께 `a11y-results.json` 파일을 남긴다. AI 코딩 도구에 결과를 전달하고, 수정 전후를 비교하고, 개발자가 직접 기준을 검사할 수 있게 하기 위해서다.
-  이 형식은 오픈소스 공개 계약이 되므로 버전을 표기하고 약속할 필드를 정해야 한다. 전체 형식은 아직 확정하지 않았다([[열린 질문:기록 데이터 모델]]).
+  이 형식은 오픈소스 공개 계약이 된다. 2026-11에 다음과 같이 정했다.
+
+  파일 전체:
+  ```json
+  {
+    "schemaVersion": 1,
+    "tool": { "name": "journey-a11y", "version": "0.1.0" },
+    "environment": { "playwright": "1.64.1", "browser": "chromium" },
+    "tests": [
+      {
+        "file": "reservation.spec.ts",
+        "title": ["예약", "예약을 변경한다"],
+        "status": "failed",
+        "retry": 1,
+        "summary": { "tabs": 32, "unnamed": 2, "unreached": 1 },
+        "steps": []
+      }
+    ]
+  }
+  ```
+  - 버전: `schemaVersion`은 정수다. 필드를 추가할 때는 그대로 두고, 기존 필드의 이름이나 뜻이 바뀔 때만 올린다.
+  - 단위: 테스트 → 단계 → Tab 지점. Playwright 리포트와 같은 구조라 서로 찾아가기 쉽다.
+  - 회차: 최종 회차만 기록한다. 버린 회차는 `attempts`에 요약되어 있다.
+  - 반복: 같은 요소가 여러 단계에 나와도 단계마다 그대로 적는다. 단계 하나만 읽어도 이해할 수 있게 하기 위해서다.
+  - 위치: 출력 폴더에 `a11y-results.json` 하나를 남긴다. 병렬 실행과 샤딩에서도 리포터가 하나로 합친다.
+  - 약속하는 필드: `reached`, `reachedBy`, `stoppedBy`, `startFocus`, `path`, `stops`(`index`, `role`, `name`, `nameSource`, `states`, `landmarks`, `heading`, `isTarget`), `attempts`(`key`, `source`, `nextStep`, `requests`), `ended`.
+  - 버전 1에서 빼는 필드: `focusVisual`, `skipLinks` 동작 결과, `resultChannels`. 고도화 때 추가하며, 추가는 `schemaVersion`을 올리지 않는다.
 
   한 단계 안에 접근 방식별 칸을 둔다. 같은 E2E 단계의 결과를 바로 비교하고, 나중에 스크린 리더 칸을 추가해도 기존 필드를 바꾸지 않기 위해서다.
 
@@ -60,6 +86,7 @@ JSON 기록: |
       "reached": true,
       "reachedBy": "self",
       "startFocus": "body",
+      "path": { "tab": 4, "arrow": 0 },
       "stops": [
         {
           "index": 4,
@@ -80,14 +107,15 @@ JSON 기록: |
   }
   ```
 
-  `expect` 단계는 결과가 어떤 경로로 전달됐는지 `resultChannels`에 남긴다. 예: `{ "via": "live-region", "role": "status", "politeness": "polite" }`. 전달 경로가 없으면 빈 목록이다.
+  고도화 단계에서 `expect` 단계는 결과가 어떤 경로로 전달됐는지 `resultChannels`에 남긴다. 예: `{ "via": "live-region", "role": "status", "politeness": "polite" }`. 전달 경로가 없으면 빈 목록이다.
 단계 결과 값: |
   | 필드 | 값 | 뜻 |
   |---|---|---|
   | `reached` | `true` / `false` | 목표에 키보드로 도달했는가 |
+  | `path` | `{ tab, arrow }` | 실제로 누른 Tab과 방향키 횟수 ([[키보드 모드:탐색 경로]]) |
   | `reachedBy` | `self` / `ancestor` / `label` / `descendant` | 어떤 관계로 도달을 인정했는가 ([[키보드 모드:도달 기준]]) |
   | `stoppedBy` | `round` / `limit` | 도달하지 못했을 때 탐색이 멈춘 이유 ([[키보드 모드:탐색 종료]]) |
-  | `skipLinks[]` | `name`, `href`, `firstStopAfter`, `moved`, `via` | 페이지의 건너뛰기 링크 후보별 결과 ([[키보드 모드:건너뛰기 링크]]) |
+  | `skipLinks[]` | `name`, `href`, `firstStopAfter`, `moved`, `via` | 페이지의 건너뛰기 링크 후보별 결과, 고도화 단계 ([[키보드 모드:건너뛰기 링크]]) |
   | `attempts[].key` | 예: `Enter` | 시도한 키 |
   | `attempts[].source` | `declared` / `role` / `generic` | 키를 어디서 알았는가 |
   | `attempts[].nextStep` | `continued` / `not-continued` / `no-next-step` | 그 키로 다음 단계를 이어갔는가 |
