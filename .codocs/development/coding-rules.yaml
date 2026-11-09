@@ -28,6 +28,7 @@ _codocs:
   | Playwright 내부 접근은 `src/playwright-internal/`에서만 | 버전이 바뀔 때 고칠 곳을 한곳에 모은다([[Playwright 가로채기:내부 API 의존]]) | 그 폴더 밖에서 `_`로 시작하는 속성 접근과 prototype 접근 금지 |
   | 내부 API 타입은 그 폴더에서 직접 선언 | `any` 금지를 지키며 prototype을 다룬다 | `no-explicit-any` |
   | 브라우저 안에서 도는 코드는 `src/page-scripts/` | `page.evaluate`로 보내는 함수는 바깥 변수를 쓸 수 없어, 섞이면 실행 중에야 깨진다 | 폴더별로 DOM 타입과 Node 타입 분리 |
+  | `test/e2e/`는 `@playwright/test`만 import | 테스트 시나리오의 E2E가 우리 도구를 모르는 평범한 E2E로 남아야 한다([[테스트 작성 규칙:시나리오 구조]]) | 그 폴더에 `no-restricted-imports` |
   | 공개 API는 `src/index.ts` 하나 | 내보낸 것은 모두 공개 약속이 된다 | `package.json`의 `exports` |
   | 패키지 형식 검사 | npm에서 타입과 경로가 깨지지 않았는지 확인한다 | publint, are-the-types-wrong(CI) |
   | 쓰지 않는 코드 검사 | 공개 패키지에 죽은 코드를 남기지 않는다 | knip |
