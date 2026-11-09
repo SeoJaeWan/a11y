@@ -2,7 +2,7 @@
 
 English | [한국어](README.ko.md)
 
-> Working title. In design; there is no code to install yet.
+> In design; there is no code to install yet.
 
 Journey A11y is a Playwright extension that re-runs your existing end-to-end tests the way a keyboard-only user would, and records what that user experiences on each step.
 
@@ -26,7 +26,7 @@ No changes to your test files. Add the projects to your existing Playwright conf
 ```ts
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
-import { a11yProjects } from '@journey-a11y/playwright'; // package name not final
+import { a11yProjects } from 'journey-a11y';
 
 export default defineConfig({
   projects: [{ name: 'chromium' }, ...a11yProjects()],

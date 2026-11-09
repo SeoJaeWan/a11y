@@ -2,7 +2,7 @@
 
 [English](README.md) | 한국어
 
-> 가칭이에요. 설계 중이라 아직 설치할 코드는 없어요.
+> 설계 중이라 아직 설치할 코드는 없어요.
 
 Journey A11y는 이미 갖고 있는 E2E 테스트를 키보드만 쓰는 사용자의 방식으로 다시 실행하고, 그 사용자가 단계마다 무엇을 겪는지 기록하는 Playwright 확장이에요.
 
@@ -26,7 +26,7 @@ E2E 테스트의 `click()`, `fill()` 같은 단계마다 다음을 남겨요.
 ```ts
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
-import { a11yProjects } from '@journey-a11y/playwright'; // 패키지 이름은 확정 전이에요
+import { a11yProjects } from 'journey-a11y';
 
 export default defineConfig({
   projects: [{ name: 'chromium' }, ...a11yProjects()],
