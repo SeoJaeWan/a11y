@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": { "journey-a11y": ["../src/index.ts"] },
+    "tsBuildInfoFile": "../node_modules/.cache/tsc/test.tsbuildinfo"
+  },
+  "include": ["*.ts", "runner", "scenarios", "e2e", "../src"]
+}
