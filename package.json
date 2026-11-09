@@ -27,13 +27,17 @@
     "lint": "eslint . --max-warnings=0",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare": "husky"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.54 <2"
   },
   "packageManager": "pnpm@10.34.5",
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@commitlint/types": "^21.2.3",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "1.65.0",
     "@types/node": "^24.19.2",
@@ -42,11 +46,14 @@
     "eslint-plugin-jsdoc": "^65.4.5",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.14.0",
+    "husky": "^9.1.7",
     "jiti": "^2.7.0",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "tsdown": "0.23.7",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
+    "validate-branch-name": "^1.3.2",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"
   },

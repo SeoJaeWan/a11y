@@ -9,6 +9,10 @@ const NO_DEFAULT_EXPORT = {
   selector: 'ExportDefaultDeclaration',
   message: 'Use named exports only.',
 };
+const NO_INLINE_TYPE_IMPORT = {
+  selector: "ImportSpecifier[importKind='type']",
+  message: "Import types with a separate 'import type' statement.",
+};
 const NO_INTERNAL_ACCESS = [
   {
     selector: 'MemberExpression[property.name=/^_/]',
@@ -66,11 +70,16 @@ export default defineConfig(
         { selector: 'import', format: null },
         { selector: 'variable', modifiers: ['destructured'], format: null },
         // Object keys often follow outside shapes (configs, headers, ARIA).
-        { selector: 'objectLiteralProperty', format: null },
+        { selector: ['objectLiteralProperty', 'objectLiteralMethod'], format: null },
         { selector: 'typeProperty', modifiers: ['requiresQuotes'], format: null },
       ],
       'func-style': ['error', 'declaration'],
-      'no-restricted-syntax': ['error', NO_DEFAULT_EXPORT, ...NO_INTERNAL_ACCESS],
+      'no-restricted-syntax': [
+        'error',
+        NO_DEFAULT_EXPORT,
+        NO_INLINE_TYPE_IMPORT,
+        ...NO_INTERNAL_ACCESS,
+      ],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'check-file/filename-naming-convention': [
@@ -115,14 +124,14 @@ export default defineConfig(
   {
     files: ['src/playwright-internal/**/*.ts'],
     rules: {
-      'no-restricted-syntax': ['error', NO_DEFAULT_EXPORT],
+      'no-restricted-syntax': ['error', NO_DEFAULT_EXPORT, NO_INLINE_TYPE_IMPORT],
     },
   },
   {
     // Tool config files must use a default export.
     files: ['*.config.ts', 'test/**/*.config.ts'],
     rules: {
-      'no-restricted-syntax': ['error', ...NO_INTERNAL_ACCESS],
+      'no-restricted-syntax': ['error', NO_INLINE_TYPE_IMPORT, ...NO_INTERNAL_ACCESS],
     },
   },
   {
