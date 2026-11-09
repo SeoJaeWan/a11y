@@ -1,0 +1,7 @@
+# Check the name of each branch being pushed, not the checked-out branch.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$local_sha" in *[!0]*) ;; *) continue ;; esac
+  case "$remote_ref" in
+    refs/heads/*) pnpm exec validate-branch-name -t "${remote_ref#refs/heads/}" || exit 1 ;;
+  esac
+done

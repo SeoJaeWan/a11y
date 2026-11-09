@@ -1,0 +1,16 @@
+# Stop if another process changes the staged files while checks run.
+pnpm exec lint-staged
+tree_before=$(git write-tree)
+
+pnpm typecheck
+
+staged_ts=$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx')
+if [ -n "$staged_ts" ]; then
+  pnpm exec vitest related --run --passWithNoTests $staged_ts
+fi
+
+tree_after=$(git write-tree)
+if [ "$tree_before" != "$tree_after" ]; then
+  echo "Staged files changed while checks were running. Review the stage and commit again." >&2
+  exit 1
+fi

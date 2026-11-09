@@ -1,0 +1,4 @@
+{
+  "pattern": "^(main|changeset-release/main|(feat|fix|docs|test|refactor|perf|build|ci|chore|style|revert)/[a-z0-9]+(-[a-z0-9]+)*)$",
+  "errorMsg": "Branch names must look like <type>/<short-description>, e.g. feat/tab-walk. Types follow the commit types."
+}

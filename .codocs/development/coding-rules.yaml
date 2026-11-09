@@ -44,7 +44,7 @@ Git 훅: |
   |---|---|---|
   | pre-commit | ESLint 자동 수정과 경고 0개 | 스테이지된 `.ts` 파일(lint-staged) |
   | | Prettier 포맷 | 스테이지된 파일, `.codocs` 제외(lint-staged) |
-  | | 타입 검사 | 프로젝트 전체, 증분(`tsc --incremental`) |
+  | | 타입 검사 | 프로젝트 전체, 증분(`tsc -b`, tsconfig 참조) |
   | | 단위 테스트 | 바뀐 파일과 그 파일을 쓰는 테스트(`vitest related`) |
   | | 스테이지 보호 | 검사 중에 다른 프로세스가 스테이지를 바꾸면 커밋을 멈춘다 |
   | commit-msg | Conventional Commits, 제목 영어, 종류는 기본 목록([[코드 작성 규칙:커밋 규칙]]) | 커밋 메시지(commitlint) |
@@ -78,6 +78,7 @@ Git 훅: |
 
   - `git revert`가 만드는 `Revert "..."` 메시지와 `Merge pull request ...` 메시지는 commitlint가 검사하지 않고 통과시킨다(2026-11 `@commitlint/is-ignored` 소스 확인).
   - 범위 표시(`feat(report): ...`)는 써도 되지만 강제하지 않는다. 패키지가 하나라 범위를 나눌 기준이 뚜렷하지 않다.
+  - 본문 한 줄은 100자 이내다. commitlint 기본 규칙(`body-max-line-length`)이다.
   - 커밋 종류는 버전을 정하지 않는다. 버전은 Changesets로 따로 관리한다.
   - 브랜치 이름의 종류도 같은 단어를 쓴다([[코드 작성 규칙:브랜치와 main 보호]]).
 버전 관리: |
