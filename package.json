@@ -33,7 +33,8 @@
     "knip": "knip",
     "dev:app": "vite --config test/app/vite.config.ts",
     "test:scenarios": "playwright test --config test/runner/scenarios.config.ts",
-    "test:scenarios:report": "playwright show-report test/.report"
+    "test:scenarios:report": "playwright show-report test/.report",
+    "release": "pnpm build && changeset publish"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.54 <2"
@@ -41,6 +42,7 @@
   "packageManager": "pnpm@10.34.5",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@commitlint/types": "^21.2.3",
