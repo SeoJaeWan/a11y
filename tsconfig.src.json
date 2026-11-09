@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "isolatedDeclarations": true,
+    "declaration": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsc/src.tsbuildinfo"
+  },
+  "include": ["src"]
+}
