@@ -31,7 +31,9 @@
     "prepare": "husky",
     "lint:package": "pnpm build && publint --strict && attw --pack . --profile esm-only",
     "knip": "knip",
-    "dev:app": "vite --config test/app/vite.config.ts"
+    "dev:app": "vite --config test/app/vite.config.ts",
+    "test:scenarios": "playwright test --config test/runner/scenarios.config.ts",
+    "test:scenarios:report": "playwright show-report test/.report"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.54 <2"

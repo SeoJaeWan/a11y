@@ -135,7 +135,7 @@ _codocs:
   정의 파일은 `test/scenarios/pieces/`(공통 조각)와 `test/scenarios/cases/`(E2E 시나리오 케이스)에 나눠 둔다. 모양은 같고 기대값만 다르다([[테스트 작성 규칙:기대값]]).
   ```ts
   // test/scenarios/pieces/accept-reach.scenario.ts
-  export const scenario = defineScenario({
+  export const scenario = definePieceScenario({
     name: '도달을 인정한다',
     conditions: {
       relation: { label: '포커스와 목표의 관계', values: ['같은 요소', '버튼 안 글자', 'label', '안의 입력 하나', '안의 링크 여럿'], base: '같은 요소' },
@@ -145,7 +145,8 @@ _codocs:
         id: 'text-in-button',
         change: { relation: '버튼 안 글자' },
         e2e: 'e2e/pieces/accept-reach/text-in-button.spec.ts',
-        expected: { steps: [{ keyboard: { reached: true, reachedBy: 'ancestor' } }] },
+        expected: { steps: [{ keyboard: { reached: true, reachedBy: 'ancestor' } }, {}] },
+        todo: true,
       },
     ],
     noCase: {},
@@ -155,6 +156,8 @@ _codocs:
   - E2E 시나리오 케이스는 `situation`에 [[테스트 작성 규칙:실사용 상황 목록]]의 줄을 적는다.
   - `e2e`는 케이스가 돌릴 E2E 파일 경로다. 코드를 정의 파일에 넣지 않는다.
   - `noCase`는 케이스를 두지 않는 값과 그 이유다.
+  - E2E 시나리오 케이스는 `defineE2eScenario`로 쓰고 `expected`에 기대 JSON 경로(`scenarios/cases/<묶음>/<케이스 id>.expected.json`)를 적는다.
+  - `todo: true`는 구현 전 표시다([[테스트 작성 규칙:작업 순서]]).
 
   케이스 화면:
   - React 앱 하나에 케이스마다 화면을 따로 둔다. 한 케이스를 고쳐도 다른 케이스에 영향이 없다.

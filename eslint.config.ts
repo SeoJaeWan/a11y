@@ -116,6 +116,9 @@ export default defineConfig(
       ],
       'jsdoc/require-description': 'error',
       'jsdoc/require-param-description': 'error',
+      // One description for a destructured object is enough.
+      'jsdoc/require-param': ['error', { checkDestructured: false }],
+      'jsdoc/check-param-names': ['error', { checkDestructured: false }],
       'jsdoc/require-returns': 'off',
     },
   },
@@ -136,8 +139,8 @@ export default defineConfig(
     },
   },
   {
-    // Tool config files must use a default export.
-    files: ['*.config.ts', 'test/**/*.config.ts'],
+    // Tool config files and the global setup must use a default export.
+    files: ['*.config.ts', 'test/**/*.config.ts', 'test/runner/global-setup.ts'],
     rules: {
       'no-restricted-syntax': ['error', NO_INLINE_TYPE_IMPORT, ...NO_INTERNAL_ACCESS],
     },
