@@ -44,11 +44,7 @@ export default async function runInner(): Promise<void> {
       {
         cwd: TEST_DIR,
         stdio: 'inherit',
-        env: {
-          ...process.env,
-          ...first.env,
-          PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(dir, 'report.json'),
-        },
+        env: innerEnv(first.env, path.join(dir, 'report.json')),
       },
     );
     writeFileSync(
@@ -97,4 +93,24 @@ function isSelected(testCase: RunnerCase, filter: GrepFilter): boolean {
   return titles.some(
     (title) => (filter.grep?.test(title) ?? true) && !(filter.grepInvert?.test(title) ?? false),
   );
+}
+
+/**
+ * Builds the environment of an inner run: this process's variables with the case settings applied.
+ * @param settings Variables of the case group; `null` removes one.
+ * @param reportPath Where the Playwright JSON report goes.
+ */
+function innerEnv(settings: Record<string, string | null>, reportPath: string): NodeJS.ProcessEnv {
+  const removed = new Set(
+    Object.entries(settings)
+      .filter(([, value]) => value === null)
+      .map(([name]) => name),
+  );
+  const kept = Object.entries(process.env).filter(([name]) => !removed.has(name));
+  const added = Object.entries(settings).filter(([, value]) => value !== null);
+  return Object.fromEntries([
+    ...kept,
+    ...added,
+    ['PLAYWRIGHT_JSON_OUTPUT_FILE', reportPath],
+  ]) as NodeJS.ProcessEnv;
 }

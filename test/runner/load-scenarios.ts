@@ -15,7 +15,7 @@ export type RunnerCase = {
   /** Cases with the same run settings run together in one inner run. */
   group: string;
   config: string;
-  env: Record<string, string>;
+  env: Record<string, string | null>;
 };
 
 type ScenarioModule = { scenario?: Scenario };
@@ -73,7 +73,7 @@ function caseTitle(testCase: PieceCase | E2eCase): string {
  * @param config Playwright config relative to test/.
  * @param env Environment variables of the inner run.
  */
-function groupName(config: string, env: Record<string, string>): string {
+function groupName(config: string, env: Record<string, string | null>): string {
   const isDefault = config === DEFAULT_CONFIG && Object.keys(env).length === 1 && env.A11Y === '1';
   if (isDefault) return 'default';
   const key = JSON.stringify([config, Object.entries(env).sort()]);
