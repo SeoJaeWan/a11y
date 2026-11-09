@@ -9,5 +9,9 @@ export default defineConfig({
   globalSetup: './global-setup.ts',
   outputDir: `${RESULTS_DIR}/outer`,
   fullyParallel: true,
-  reporter: [['list'], ['html', { outputFolder: REPORT_DIR, open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: REPORT_DIR, open: 'never' }],
+    ['json', { outputFile: `${RESULTS_DIR}/outer.json` }],
+  ],
 });
