@@ -1,0 +1,45 @@
+{
+  "name": "journey-a11y",
+  "version": "0.0.0",
+  "description": "Re-run your Playwright E2E tests keyboard-only and record what the user experiences on each step.",
+  "keywords": [
+    "playwright",
+    "accessibility",
+    "a11y",
+    "keyboard",
+    "e2e"
+  ],
+  "homepage": "https://github.com/SeoJaeWan/a11y#readme",
+  "bugs": "https://github.com/SeoJaeWan/a11y/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SeoJaeWan/a11y.git"
+  },
+  "license": "MIT",
+  "author": "SeoJaeWan",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.54 <2"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "^24.19.2",
+    "tsdown": "0.23.7",
+    "typescript": "~6.0.3"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  }
+}
