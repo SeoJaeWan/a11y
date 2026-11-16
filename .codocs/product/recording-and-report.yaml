@@ -69,6 +69,7 @@ JSON 기록: |
   ```
   - 버전: `schemaVersion`은 정수다. 필드를 추가할 때는 그대로 두고, 기존 필드의 이름이나 뜻이 바뀔 때만 올린다.
   - 단위: 테스트 → 단계 → Tab 지점. Playwright 리포트와 같은 구조라 서로 찾아가기 쉽다.
+  - 단계: E2E의 동작(`click`, `fill`, `check`, `press`, `selectOption`, `setInputFiles`, `dragTo`, `page.mouse` 등)과 `expect` 확인이 단계다. `expect` 단계는 `action`, `target`, `location`만 남기고 `keyboard` 칸이 없다. `page.goto`, 기다림(`waitFor`), 값 읽기(`textContent` 등)는 단계가 아니다. 키보드로 끝까지 갔다는 근거는 테스트 결과와 확인 단계이고, 확인이 기록에 있어야 `nextStep`이 무엇을 근거로 했는지와 고도화 때의 `resultChannels`가 붙을 자리가 생긴다. 2026-11 결정이다.
   - 회차: 최종 회차만 기록한다. 버린 회차는 `attempts`에 요약되어 있다.
   - 반복: 같은 요소가 여러 단계에 나와도 단계마다 그대로 적는다. 단계 하나만 읽어도 이해할 수 있게 하기 위해서다.
   - 위치: 출력 폴더에 `a11y-results.json` 하나를 남긴다. 병렬 실행과 샤딩에서도 리포터가 하나로 합친다.
