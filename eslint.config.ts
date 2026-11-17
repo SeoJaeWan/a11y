@@ -50,7 +50,17 @@ const REACT_NAMING = [
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'node_modules/', '.codocs/', 'test-results/', 'playwright-report/'],
+    // test/tools holds plain .mjs helpers for writing cases; they are not part of the package.
+    ignores: [
+      'dist/',
+      'node_modules/',
+      '.codocs/',
+      'test-results/',
+      'playwright-report/',
+      'test/.results*/',
+      'test/.report*/',
+      'test/tools/',
+    ],
   },
   {
     linterOptions: {

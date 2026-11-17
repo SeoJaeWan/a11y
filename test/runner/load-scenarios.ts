@@ -3,34 +3,33 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import type { E2eCase, PieceCase, Scenario } from './define-scenario';
+import type { Scenario, ScenarioCase } from './define-scenario';
 import { DEFAULT_CONFIG, RESULTS_DIR, SCENARIO_DIR } from './paths';
 
 /** A case ready to run: where its titles, E2E file, and results are. */
 export type RunnerCase = {
-  /** Outer test titles: kind, scenario name, case title. */
-  titles: [string, string, string];
-  scenario: Scenario;
-  case: PieceCase | E2eCase;
+  /** Outer test titles: group name, situation. */
+  titles: [string, string];
+  case: ScenarioCase;
   /** Cases with the same run settings run together in one inner run. */
   group: string;
   config: string;
-  env: Record<string, string>;
+  env: Record<string, string | null>;
 };
 
 type ScenarioModule = { scenario?: Scenario };
 
-/** Reads every `*.scenario.ts` under test/scenarios and lists their cases. */
+/** Reads every `*.scenario.ts` under test/scenarios/cases and lists their cases. */
 export async function loadCases(): Promise<RunnerCase[]> {
   const cases: RunnerCase[] = [];
-  for (const kindDir of ['pieces', 'cases']) {
-    const dir = path.join(SCENARIO_DIR, kindDir);
-    const files = (await readdir(dir)).filter((file) => file.endsWith('.scenario.ts')).sort();
-    for (const file of files) {
-      const module = (await import(pathToFileURL(path.join(dir, file)).href)) as ScenarioModule;
-      if (!module.scenario) throw new Error(`${kindDir}/${file} must export "scenario"`);
-      cases.push(...toRunnerCases(module.scenario));
-    }
+  const dir = path.join(SCENARIO_DIR, 'cases');
+  // A fresh checkout has no scenario folder until the first case is written.
+  const entries = await readdir(dir).catch(() => []);
+  const files = entries.filter((file) => file.endsWith('.scenario.ts')).sort();
+  for (const file of files) {
+    const module = (await import(pathToFileURL(path.join(dir, file)).href)) as ScenarioModule;
+    if (!module.scenario) throw new Error(`cases/${file} must export "scenario"`);
+    cases.push(...toRunnerCases(module.scenario));
   }
   return cases;
 }
@@ -44,12 +43,7 @@ function toRunnerCases(scenario: Scenario): RunnerCase[] {
     const config = testCase.config ?? DEFAULT_CONFIG;
     const env = { A11Y: '1', ...testCase.env };
     return {
-      titles: [
-        scenario.kind === 'piece' ? '공통 조각' : 'E2E 케이스',
-        scenario.name,
-        caseTitle(testCase),
-      ],
-      scenario,
+      titles: [scenario.name, testCase.situation],
       case: testCase,
       group: groupName(config, env),
       config,
@@ -59,21 +53,11 @@ function toRunnerCases(scenario: Scenario): RunnerCase[] {
 }
 
 /**
- * Names a case in the report: the situation, the changed condition value, or `기준`.
- * @param testCase Piece or E2E case.
- */
-function caseTitle(testCase: PieceCase | E2eCase): string {
-  if ('situation' in testCase) return testCase.situation;
-  const values = Object.values(testCase.change);
-  return values.length > 0 ? values.join(', ') : '기준';
-}
-
-/**
  * Builds a stable folder name for cases that share run settings.
  * @param config Playwright config relative to test/.
  * @param env Environment variables of the inner run.
  */
-function groupName(config: string, env: Record<string, string>): string {
+function groupName(config: string, env: Record<string, string | null>): string {
   const isDefault = config === DEFAULT_CONFIG && Object.keys(env).length === 1 && env.A11Y === '1';
   if (isDefault) return 'default';
   const key = JSON.stringify([config, Object.entries(env).sort()]);

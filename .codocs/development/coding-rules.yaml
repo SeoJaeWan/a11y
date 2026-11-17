@@ -139,7 +139,7 @@ npm 배포: |
   | `pnpm format:check` | 포맷이 맞는지만 확인한다 | CI |
   | `pnpm typecheck` | 타입 검사 | 훅, CI |
   | `pnpm test` | 단위 테스트 전체(Vitest) | 로컬, CI |
-  | `pnpm test:scenarios` | 공통 조각과 E2E 케이스 시나리오 전체 | 로컬, CI |
+  | `pnpm test:scenarios` | E2E 시나리오 케이스 전체 | 로컬, CI |
   | `pnpm test:scenarios:report` | 시나리오 리포트를 띄운다(trace 포함) | 로컬 |
   | `pnpm dev:app` | 케이스 화면용 React 앱을 띄운다 | 로컬 |
   | `pnpm lint:package` | 패키지 형식 검사(publint, are-the-types-wrong) | CI |
@@ -148,7 +148,7 @@ npm 배포: |
 
   시나리오 일부만 돌리기: `pnpm test:scenarios`는 Playwright 명령이라 뒤에 붙인 옵션이 그대로 전달된다. TDD로 기능 하나를 만들 때 그 기능의 케이스만 돌린다. 바깥 테스트 이름([[테스트 작성 규칙:실행 방식]])으로 고른다.
   ```bash
-  pnpm test:scenarios --grep "도달을 인정한다"
+  pnpm test:scenarios --grep "도달"
   pnpm test:scenarios --grep "표준 탭 메뉴"
   ```
   `pnpm build`는 tsdown으로 한다([[코드 작성 규칙:빌드]]).

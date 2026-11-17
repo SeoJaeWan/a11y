@@ -1,0 +1,115 @@
+import { defineE2eScenario } from '../../runner/define-scenario';
+
+const E2E = 'e2e/cases/run';
+// The next line's own `expect` fails, so the error is Playwright's and names the locator it waited for.
+const STATUS_EXPECT_FAILED = "getByRole('status')";
+
+export const scenario = defineE2eScenario({
+  name: '실행',
+  cases: [
+    {
+      id: 'space-only-div-button',
+      situation: 'Space만 처리하는 `div role="button"`',
+      e2e: `${E2E}/space-only-div-button.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: STATUS_EXPECT_FAILED,
+        lines: ['5행 click 통과: Tab 4번, button "창가 좌석 선택"에서 Enter'],
+        notices: [],
+      },
+    },
+    {
+      id: 'no-key-div-button',
+      situation: '키 처리가 없는 `div role="button"`',
+      e2e: `${E2E}/no-key-div-button.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: STATUS_EXPECT_FAILED,
+        lines: ['5행 click 통과: Tab 4번, button "알림 받기"에서 Enter'],
+        notices: [],
+      },
+    },
+    {
+      id: 'text-input',
+      situation: '입력창',
+      e2e: `${E2E}/text-input.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 fill 통과: Tab 4번, textbox "예약자 이름"에 글자 입력'],
+        notices: [],
+      },
+    },
+    {
+      id: 'checkbox',
+      situation: '체크박스',
+      e2e: `${E2E}/checkbox.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 check 통과: Tab 4번, checkbox "약관에 동의합니다"에서 Space'],
+        notices: [],
+      },
+    },
+    {
+      id: 'radio-arrow',
+      situation: '라디오 버튼',
+      e2e: `${E2E}/radio-arrow.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 check 통과: Tab 4번, ↓ 2번, radio "새벽 배송" 선택'],
+        notices: [],
+      },
+    },
+    {
+      id: 'select-option',
+      situation: '`selectOption`',
+      e2e: `${E2E}/select-option.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 selectOption 통과: Tab 4번, combobox "인원"에 닿음, 값은 원래 방식으로 선택'],
+        notices: [],
+      },
+    },
+    {
+      id: 'hover-focus-button',
+      situation: '`hover` 뒤 버튼, 포커스로도 나타남',
+      e2e: `${E2E}/hover-focus-button.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 hover 통과: Tab 4번, button "계정"으로 포커스 이동',
+          '6행 click 통과: Tab 1번, button "로그아웃"에서 Enter',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'hover-mouse-only-button',
+      situation: '`hover` 뒤 버튼, 마우스에만 나타남',
+      e2e: `${E2E}/hover-mouse-only-button.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: "getByRole('button', { name: '로그아웃' })",
+        lines: [
+          '5행 hover 통과: Tab 4번, button "계정"으로 포커스 이동',
+          '6행 click 실패: 목표가 화면에 나타나지 않음',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'drag-to',
+      situation: '`dragTo`',
+      e2e: `${E2E}/drag-to.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 dragTo 검사하지 못함: 드래그는 키보드 대안이 필요한 동작이며 확인하지 못했습니다',
+          '6행 click 통과: Tab 1번, button "저장"에서 Enter',
+        ],
+        notices: [
+          '[journey-a11y] cases/run/drag-to.spec.ts:5 dragTo — 키보드로 검사하지 못했습니다',
+        ],
+      },
+    },
+  ],
+});

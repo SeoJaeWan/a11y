@@ -3,7 +3,8 @@
   "compilerOptions": {
     "isolatedDeclarations": true,
     "declaration": true,
-    "tsBuildInfoFile": "node_modules/.cache/tsc/src.tsbuildinfo"
+    "tsBuildInfoFile": "node_modules/.cache/tsc/src.tsbuildinfo",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
   "include": ["src"]
 }

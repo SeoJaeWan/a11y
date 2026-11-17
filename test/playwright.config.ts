@@ -10,10 +10,18 @@ export default defineConfig({
     baseURL: 'http://localhost:5174',
     trace: 'on',
   },
-  webServer: {
-    command: 'pnpm dev:app',
-    url: 'http://localhost:5174',
-    reuseExistingServer: true,
-  },
+  webServer: [
+    {
+      command: 'pnpm dev:app',
+      url: 'http://localhost:5174',
+      reuseExistingServer: true,
+    },
+    // The same app on a second port: a page on another origin for cross-origin iframes.
+    {
+      command: 'pnpm dev:app --port 5175',
+      url: 'http://localhost:5175',
+      reuseExistingServer: true,
+    },
+  ],
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }, ...a11yProjects()],
 });
