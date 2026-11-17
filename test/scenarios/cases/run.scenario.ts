@@ -35,7 +35,7 @@ export const scenario = defineE2eScenario({
       e2e: `${E2E}/text-input.spec.ts`,
       expected: {
         status: 'passed',
-        lines: ['5행 fill 통과: Tab 4번, textbox "예약자 이름"에 글자 입력'],
+        lines: ['5행 fill 통과: Tab 4번, textbox "예약자 이름"에 닿음, 값은 원래 방식으로 입력'],
         notices: [],
       },
     },

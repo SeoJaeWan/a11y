@@ -23,6 +23,9 @@ const ACTION_NAMES: readonly ActionName[] = [
   'selectOption',
   'hover',
   'dragAndDrop',
+  'dblclick',
+  'tap',
+  'setInputFiles',
 ];
 
 const insideTool = new AsyncLocalStorage<true>();
@@ -33,8 +36,12 @@ let isInstalled = false;
  * an option slot runs as a fixture for that project only, so other projects stay untouched.
  * This is not a documented Playwright contract.
  * @param interception What to do on each action and at the start and end of each test.
+ * @param testIdAttribute Test id attribute of the user's config; the option slot must keep giving it.
  */
-export function interceptInProject(interception: Interception): { testIdAttribute: string } {
+export function interceptInProject(
+  interception: Interception,
+  testIdAttribute: string,
+): { testIdAttribute: string } {
   /**
    * Installs the patch once per worker and wraps each test of the project.
    * @param fixtures Playwright fixtures this one depends on.
@@ -52,8 +59,7 @@ export function interceptInProject(interception: Interception): { testIdAttribut
       isInstalled = true;
     }
     interception.onTestStart(testInfo);
-    // The slot belongs to the test id attribute; a changed attribute name is not supported yet.
-    await use('data-testid');
+    await use(testIdAttribute);
     await interception.onTestEnd(testInfo);
   }
   return { testIdAttribute: install as unknown as string };

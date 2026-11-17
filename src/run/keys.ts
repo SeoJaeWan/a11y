@@ -48,13 +48,3 @@ export async function pressKey(page: Page, name: KeyName): Promise<void> {
     windowsVirtualKeyCode: keyCode,
   });
 }
-
-/**
- * Types text into the focused element, the way an input method commits it.
- * @param page Page that has focus.
- * @param text Text to enter.
- */
-export async function insertText(page: Page, text: string): Promise<void> {
-  const session = await sessionOf(page);
-  await session.send('Input.insertText', { text });
-}

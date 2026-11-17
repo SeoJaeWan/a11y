@@ -10,7 +10,7 @@ import type { Caller } from './caller';
 import { findCaller, userFrames } from './caller';
 import { describeElement } from './describe-element';
 import { roleOf } from './element-label';
-import { insertText, pressKey } from './keys';
+import { pressKey } from './keys';
 import { arrowSymbol, describeMoves } from './moves';
 import type { Reach } from './reach';
 import { reach } from './reach';
@@ -25,6 +25,9 @@ const DISPLAY_NAMES = {
   selectOption: 'selectOption',
   hover: 'hover',
   dragAndDrop: 'dragTo',
+  dblclick: 'dblclick',
+  tap: 'tap',
+  setInputFiles: 'setInputFiles',
 } as const;
 
 export type ActionName = keyof typeof DISPLAY_NAMES;
@@ -42,10 +45,24 @@ export type ActionCall = {
   runOriginal: () => Promise<unknown>;
 };
 
-type ActionOptions = { strict?: boolean; timeout?: number };
+type ActionOptions = { strict?: boolean; timeout?: number; button?: string };
+
+/** Actions with no agreed keyboard way yet. They run the original way and are reported. */
+const NOT_CHECKED_ACTIONS = new Set<ActionName>([
+  'dragAndDrop',
+  'dblclick',
+  'tap',
+  'setInputFiles',
+]);
+const NOT_CHECKED = '검사하지 못함: 키보드로 바꿔 실행하는 방법이 정해지지 않은 동작입니다';
+const NOT_CHECKED_DRAG =
+  '검사하지 못함: 드래그는 키보드 대안이 필요한 동작이며 확인하지 못했습니다';
 
 /** Roles whose keyboard action is Space, by the ARIA Authoring Practices. Others use Enter. */
 const SPACE_ROLES = new Set(['checkbox', 'radio', 'switch']);
+
+/** How often to look again while waiting for a disabled element to turn on. */
+const ENABLED_POLL_MS = 50;
 
 /**
  * Runs one action of the test with the keyboard and records what happened on its line.
@@ -67,27 +84,33 @@ export async function handleAction(call: ActionCall): Promise<unknown> {
  */
 async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Promise<unknown> {
   const { name, frame, args } = call;
+  const options = readOptions(args.at(-1));
   const prefix = `${caller ? String(caller.line) : '?'}행 ${DISPLAY_NAMES[name]}`;
-  if (name === 'dragAndDrop') {
-    reserveLine(
-      prefix,
-      '검사하지 못함: 드래그는 키보드 대안이 필요한 동작이며 확인하지 못했습니다',
+  const isMouseOnlyClick = name === 'click' && (options.button ?? 'left') !== 'left';
+  if (NOT_CHECKED_ACTIONS.has(name) || isMouseOnlyClick) {
+    // Nothing passes silently: an action the keyboard did not run is said to be unchecked.
+    reserveLine(prefix, name === 'dragAndDrop' ? NOT_CHECKED_DRAG : NOT_CHECKED);
+    console.log(
+      `[journey-a11y] ${describeCaller(caller)} ${DISPLAY_NAMES[name]} — 키보드로 검사하지 못했습니다`,
     );
-    console.log(`[journey-a11y] ${describeCaller(caller)} dragTo — 키보드로 검사하지 못했습니다`);
     return call.runOriginal();
   }
 
-  const options = readOptions(args.at(-1));
   const locator = frame.locator(call.selector);
   // `page.click(selector)` is not strict: like Playwright, it acts on the first match.
   const target = options.strict === true ? locator : locator.first();
   const page = frame.page();
   const setLine = reserveLine(prefix, '실패: 목표가 화면에 나타나지 않음');
   try {
+    // Wait for what the original action waits for, so a slow page does not fail the keyboard run.
     await target.waitFor({
       state: 'visible',
       ...(options.timeout === undefined ? {} : { timeout: options.timeout }),
     });
+    if (name !== 'hover') {
+      setLine('실패: 목표가 켜지지 않음');
+      await waitUntilEnabled(target, options.timeout);
+    }
   } catch (error) {
     throw pointAtUser(error, call.stack);
   }
@@ -113,8 +136,10 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
       return undefined;
     }
     case 'fill': {
-      await insertText(page, String(args[0]));
-      setLine(`통과: ${moves}, ${label}에 글자 입력`);
+      // Entering the value is what Playwright's fill already does without keys; the site can
+      // only break reaching the field.
+      await call.runOriginal();
+      setLine(`통과: ${moves}, ${label}에 닿음, 값은 원래 방식으로 입력`);
       return undefined;
     }
     case 'check':
@@ -139,6 +164,8 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
       setLine(`통과: ${moves}, ${label}으로 포커스 이동`);
       return undefined;
     }
+    default:
+      return call.runOriginal();
   }
 }
 
@@ -147,7 +174,25 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
  * @param value Last argument of the action.
  */
 function readOptions(value: unknown): ActionOptions {
-  return typeof value === 'object' && value !== null ? value : {};
+  return typeof value === 'object' && value !== null && !Array.isArray(value) ? value : {};
+}
+
+/**
+ * Waits for a disabled element to turn on, as long as the original action would wait.
+ * Without a timeout the test's own time limit ends the wait.
+ * @param target Element the test pointed at.
+ * @param timeout Time limit the test gave the action, if any.
+ */
+async function waitUntilEnabled(target: Locator, timeout: number | undefined): Promise<void> {
+  const deadline = timeout === undefined || timeout === 0 ? Infinity : Date.now() + timeout;
+  while (!(await target.isEnabled())) {
+    if (Date.now() > deadline) {
+      throw new Error(
+        `${describeLocator(target)}: ${String(timeout)}ms 안에 켜지지 않았습니다(disabled).`,
+      );
+    }
+    await new Promise((resolve) => setTimeout(resolve, ENABLED_POLL_MS));
+  }
 }
 
 /**

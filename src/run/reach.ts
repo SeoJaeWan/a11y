@@ -1,6 +1,6 @@
 import type { ElementHandle, Locator } from '@playwright/test';
 
-import { checkFocus, createSeen } from '../page-scripts/check-focus';
+import { checkFocus, createVisits } from '../page-scripts/check-focus';
 import { findAnswer } from '../page-scripts/find-answer';
 import { findArrowKey, previewElement } from '../page-scripts/read-element';
 import { pressKey } from './keys';
@@ -27,7 +27,7 @@ export async function reach(target: Locator): Promise<Reach> {
   if (!answer) return { kind: 'not-focusable', preview: await target.evaluate(previewElement) };
 
   let tabs = 0;
-  const seenByTab = await answer.evaluateHandle(createSeen);
+  const seenByTab = await answer.evaluateHandle(createVisits);
   let place = await answer.evaluate(checkFocus, seenByTab);
   while (place.at === 'other') {
     await pressKey(page, 'Tab');
@@ -39,7 +39,7 @@ export async function reach(target: Locator): Promise<Reach> {
   let arrows = 0;
   const arrowKey = await answer.evaluate(findArrowKey);
   if (place.at === 'group') {
-    const seenByArrow = await answer.evaluateHandle(createSeen);
+    const seenByArrow = await answer.evaluateHandle(createVisits);
     place = await answer.evaluate(checkFocus, seenByArrow);
     while (place.at !== 'answer') {
       await pressKey(page, arrowKey);
