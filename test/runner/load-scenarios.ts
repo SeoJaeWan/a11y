@@ -25,7 +25,9 @@ export async function loadCases(): Promise<RunnerCase[]> {
   const cases: RunnerCase[] = [];
   for (const kindDir of ['pieces', 'cases']) {
     const dir = path.join(SCENARIO_DIR, kindDir);
-    const files = (await readdir(dir)).filter((file) => file.endsWith('.scenario.ts')).sort();
+    // A fresh checkout has no scenario folder until the first case is written.
+    const entries = await readdir(dir).catch(() => []);
+    const files = entries.filter((file) => file.endsWith('.scenario.ts')).sort();
     for (const file of files) {
       const module = (await import(pathToFileURL(path.join(dir, file)).href)) as ScenarioModule;
       if (!module.scenario) throw new Error(`${kindDir}/${file} must export "scenario"`);
