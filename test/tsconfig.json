@@ -1,8 +1,11 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "paths": { "journey-a11y": ["../src/index.ts"] },
-    "tsBuildInfoFile": "../node_modules/.cache/tsc/test.tsbuildinfo"
+    "paths": {
+      "journey-a11y": ["../src/index.ts"]
+    },
+    "tsBuildInfoFile": "../node_modules/.cache/tsc/test.tsbuildinfo",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
   "include": ["*.ts", "runner", "scenarios", "e2e", "../src"]
 }

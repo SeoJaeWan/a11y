@@ -57,6 +57,8 @@ export default defineConfig(
       '.codocs/',
       'test-results/',
       'playwright-report/',
+      'test/.results*/',
+      'test/.report*/',
       'test/tools/',
     ],
   },

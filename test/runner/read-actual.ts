@@ -14,7 +14,9 @@ const ANSI_COLOR = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
  * @param result Last result of the accessibility run test.
  */
 export function readActual(result: JSONReportTestResult): Expected {
-  const error = result.errors[0]?.message ?? result.error?.message;
+  // A timed out test has two errors: the time limit, then the action that was still waiting.
+  const messages = result.errors.map((item) => item.message);
+  const error = messages.length > 0 ? messages.join('\n') : result.error?.message;
   return {
     status: result.status === 'passed' ? 'passed' : 'failed',
     ...(error === undefined ? {} : { error: error.replace(ANSI_COLOR, '') }),
