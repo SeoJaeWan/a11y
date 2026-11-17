@@ -1,1 +1,1 @@
-export { a11yProjects } from './a11y-projects';
+export { withA11y } from './with-a11y';

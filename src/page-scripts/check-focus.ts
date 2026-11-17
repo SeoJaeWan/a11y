@@ -6,19 +6,25 @@ export type FocusPlace = {
   isRepeat: boolean;
 };
 
+/** Elements focus has visited in one search, and the one it was on last. */
+export type Visits = { seen: WeakSet<Element>; last: Element | null };
+
 /**
  * Says where focus is and whether it has been there before.
  * An element named by `aria-activedescendant` counts as the focused one.
  * Runs in the page, so it uses nothing from outside.
  * @param answer Element the keyboard must reach.
- * @param seen Elements focus has already visited in this search.
+ * @param visits Elements focus has already visited in this search.
  */
-export function checkFocus(answer: Element, seen: WeakSet<Element>): FocusPlace {
+export function checkFocus(answer: Element, visits: Visits): FocusPlace {
   const active = document.activeElement ?? document.body;
   const pointedId = active.getAttribute('aria-activedescendant');
   const current = (pointedId ? document.getElementById(pointedId) : null) ?? active;
-  const isRepeat = seen.has(current);
-  seen.add(current);
+  // One key can leave focus where it is, as inside a date field with several parts. Only coming
+  // back to an element after being somewhere else is a round.
+  const isRepeat = visits.seen.has(current) && visits.last !== current;
+  visits.seen.add(current);
+  visits.last = current;
   if (current === answer) return { at: 'answer', isRepeat };
 
   let isInGroup = false;
@@ -37,15 +43,19 @@ export function checkFocus(answer: Element, seen: WeakSet<Element>): FocusPlace 
     const group = answer.closest(
       '[role="listbox"], [role="menu"], [role="menubar"], [role="tablist"], [role="radiogroup"]',
     );
-    isInGroup = group?.contains(current) ?? false;
+    // A combobox or menu button keeps focus and names the list it drives with `aria-controls`.
+    const controlled = `${active.getAttribute('aria-controls') ?? ''} ${active.getAttribute('aria-owns') ?? ''}`;
+    isInGroup =
+      group !== null &&
+      (group.contains(current) || (group.id !== '' && controlled.split(/\s+/).includes(group.id)));
   }
   return { at: isInGroup ? 'group' : 'other', isRepeat };
 }
 
 /**
- * Creates the set that remembers visited elements. It lives in the page so elements can be compared.
+ * Creates the record of visited elements. It lives in the page so elements can be compared.
  * Runs in the page, so it uses nothing from outside.
  */
-export function createSeen(): WeakSet<Element> {
-  return new WeakSet<Element>();
+export function createVisits(): Visits {
+  return { seen: new WeakSet<Element>(), last: null };
 }

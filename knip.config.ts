@@ -4,6 +4,7 @@ const config: KnipConfig = {
   entry: [
     'test/*.config.ts',
     'test/e2e/**/*.spec.ts',
+    'test/e2e/**/*.setup.ts',
     'test/scenarios/**/*.scenario.ts',
     'test/tools/*.mjs',
   ],

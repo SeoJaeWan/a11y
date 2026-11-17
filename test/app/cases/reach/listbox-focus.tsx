@@ -32,6 +32,8 @@ export function Page(): React.JSX.Element {
    */
   function handleKeyDown(event: React.KeyboardEvent, index: number): void {
     if (event.key === 'Enter') {
+      // Without this the same Enter also presses whatever takes focus next.
+      event.preventDefault();
       pick(GRADES[index] ?? '');
       return;
     }
