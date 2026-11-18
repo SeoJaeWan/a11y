@@ -1,4 +1,4 @@
-import type { ElementHandle, Locator } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 
 import { checkFocus, createVisits } from '../page-scripts/check-focus';
 import { findAnswer } from '../page-scripts/find-answer';
@@ -15,13 +15,22 @@ export type Reach =
   | { kind: 'round'; key: 'Tab' | ArrowKey; presses: number };
 
 /**
- * Brings focus to the target with the keyboard: Tab from where focus is, then arrow keys when
- * the target is an item of an arrow-key group. Stops when focus returns to a place it has
- * already been.
+ * Brings focus to the target of a locator with the keyboard.
  * @param target Element the test pointed at.
  */
 export async function reach(target: Locator): Promise<Reach> {
-  const page = target.page();
+  const element = await target.evaluateHandle((node) => node);
+  return reachElement(target.page(), element.asElement());
+}
+
+/**
+ * Brings focus to an element with the keyboard: Tab from where focus is, then arrow keys when
+ * the element is an item of an arrow-key group. Stops when focus returns to a place it has
+ * already been.
+ * @param page Page the element is in.
+ * @param target Element to reach.
+ */
+export async function reachElement(page: Page, target: ElementHandle<Element>): Promise<Reach> {
   const found = await target.evaluateHandle(findAnswer);
   const answer = found.asElement();
   if (!answer) return { kind: 'not-focusable', preview: await target.evaluate(previewElement) };

@@ -77,12 +77,11 @@ export const scenario = defineE2eScenario({
         lines: [
           `6행 dblclick ${NOT_CHECKED}`,
           `7행 fill 통과: Tab 1번, textbox "후기 내용"에 닿음, ${FILLED}`,
-          `8행 setInputFiles ${NOT_CHECKED}`,
-          '9행 click 통과: Tab 2번, button "등록"에서 Enter',
+          '8행 setInputFiles 통과: Tab 1번, button "사진 첨부"에서 Enter, 열린 선택 창에 파일을 넣음',
+          '9행 click 통과: Tab 1번, button "등록"에서 Enter',
         ],
         notices: [
           '[journey-a11y] cases/journey/review-write.spec.ts:6 dblclick — 키보드로 검사하지 못했습니다',
-          '[journey-a11y] cases/journey/review-write.spec.ts:8 setInputFiles — 키보드로 검사하지 못했습니다',
         ],
       },
     },

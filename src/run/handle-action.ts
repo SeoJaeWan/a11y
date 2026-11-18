@@ -1,10 +1,11 @@
 import path from 'node:path';
 
-import type { Frame, Locator } from '@playwright/test';
+import type { FileChooser, Frame, Locator } from '@playwright/test';
 import { test } from '@playwright/test';
 
 import { OWN_DIR } from '../own-dir';
-import { isChecked } from '../page-scripts/read-element';
+import { findFileOpener } from '../page-scripts/find-file-opener';
+import { isChecked, previewElement, readLabelText } from '../page-scripts/read-element';
 import { describeLocator } from '../playwright-internal/describe-locator';
 import type { Caller } from './caller';
 import { findCaller, userFrames } from './caller';
@@ -13,7 +14,7 @@ import { roleOf } from './element-label';
 import { pressKey } from './keys';
 import { arrowSymbol, describeMoves } from './moves';
 import type { Reach } from './reach';
-import { reach } from './reach';
+import { reach, reachElement } from './reach';
 import { reserveLine } from './summary';
 
 /** Name each intercepted action shows in results, by its frame method. */
@@ -48,18 +49,19 @@ export type ActionCall = {
 type ActionOptions = { strict?: boolean; timeout?: number; button?: string };
 
 /** Actions with no agreed keyboard way yet. They run the original way and are reported. */
-const NOT_CHECKED_ACTIONS = new Set<ActionName>([
-  'dragAndDrop',
-  'dblclick',
-  'tap',
-  'setInputFiles',
-]);
+const NOT_CHECKED_ACTIONS = new Set<ActionName>(['dragAndDrop', 'dblclick', 'tap']);
 const NOT_CHECKED = '검사하지 못함: 키보드로 바꿔 실행하는 방법이 정해지지 않은 동작입니다';
 const NOT_CHECKED_DRAG =
   '검사하지 못함: 드래그는 키보드 대안이 필요한 동작이며 확인하지 못했습니다';
 
 /** Roles whose keyboard action is Space, by the ARIA Authoring Practices. Others use Enter. */
 const SPACE_ROLES = new Set(['checkbox', 'radio', 'switch']);
+
+/**
+ * How long to wait for the file dialog after the key. The browser opens it while it handles the
+ * key, so a dialog that has not come by then is not coming.
+ */
+const FILE_CHOOSER_WAIT_MS = 2000;
 
 /** How often to look again while waiting for a disabled element to turn on. */
 const ENABLED_POLL_MS = 50;
@@ -86,7 +88,9 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
   const { name, frame, args } = call;
   const options = readOptions(args.at(-1));
   const prefix = `${caller ? String(caller.line) : '?'}행 ${DISPLAY_NAMES[name]}`;
-  const isMouseOnlyClick = name === 'click' && (options.button ?? 'left') !== 'left';
+  const button = options.button ?? 'left';
+  // The middle button has no key; the right button has the context menu key.
+  const isMouseOnlyClick = name === 'click' && button !== 'left' && button !== 'right';
   if (NOT_CHECKED_ACTIONS.has(name) || isMouseOnlyClick) {
     // Nothing passes silently: an action the keyboard did not run is said to be unchecked.
     reserveLine(prefix, name === 'dragAndDrop' ? NOT_CHECKED_DRAG : NOT_CHECKED);
@@ -100,6 +104,7 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
   // `page.click(selector)` is not strict: like Playwright, it acts on the first match.
   const target = options.strict === true ? locator : locator.first();
   const page = frame.page();
+  if (name === 'setInputFiles') return uploadWithKeyboard(call, target, options, prefix);
   const setLine = reserveLine(prefix, '실패: 목표가 화면에 나타나지 않음');
   try {
     // Wait for what the original action waits for, so a slow page does not fail the keyboard run.
@@ -130,6 +135,11 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
   const moves = describeMoves(result);
   switch (name) {
     case 'click': {
+      if (button === 'right') {
+        await pressKey(page, 'Shift+F10');
+        setLine(`통과: ${moves}, ${label}에서 Shift+F10`);
+        return undefined;
+      }
       const key = SPACE_ROLES.has(roleOf(label)) ? 'Space' : 'Enter';
       await pressKey(page, key);
       setLine(`통과: ${moves}, ${label}에서 ${key}`);
@@ -167,6 +177,77 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
     default:
       return call.runOriginal();
   }
+}
+
+/**
+ * Puts files into a file input the way a keyboard user does: reach the element that opens the
+ * file dialog, press Enter, and give the files to the dialog that opened. Picking inside the
+ * dialog belongs to the operating system, so only opening it is done with the keyboard.
+ * @param call Intercepted `setInputFiles` action.
+ * @param target File input the test pointed at.
+ * @param options Options the test gave the action.
+ * @param prefix Line number and action name for the summary.
+ */
+async function uploadWithKeyboard(
+  call: ActionCall,
+  target: Locator,
+  options: ActionOptions,
+  prefix: string,
+): Promise<undefined> {
+  const { frame, stack } = call;
+  const page = frame.page();
+  const timeout = options.timeout === undefined ? {} : { timeout: options.timeout };
+  const setLine = reserveLine(prefix, '실패: 목표가 페이지에 나타나지 않음');
+  try {
+    // The original action takes a hidden input too, so it waits only for the input to exist.
+    await target.waitFor({ state: 'attached', ...timeout });
+  } catch (error) {
+    throw pointAtUser(error, stack);
+  }
+
+  const header = `키보드로 닿을 수 없습니다: ${describeLocator(target)}`;
+  const opener = (await target.evaluateHandle(findFileOpener)).asElement();
+  if (!opener) {
+    setLine('실패: 닿을 수 없음');
+    const preview = await target.evaluate(previewElement);
+    throw pointAtUser(
+      new Error(
+        `${header}
+목표 ${preview}은(는) 화면에 보이지 않고, 화면에 보이는 연결된 label도 없습니다.
+` + '파일 선택 창을 여는 요소를 click하도록 테스트를 쓰면 키보드로 확인할 수 있습니다.',
+      ),
+      stack,
+    );
+  }
+  const result = await reachElement(page, opener);
+  if (result.kind !== 'reached') {
+    setLine('실패: 닿을 수 없음');
+    throw pointAtUser(new Error(describeFailure(target, result)), stack);
+  }
+
+  const labelText = await result.answer.evaluate(readLabelText);
+  const label =
+    labelText === null ? await describeElement(frame, result.answer) : `label "${labelText}"`;
+  const opened = page
+    .waitForEvent('filechooser', { timeout: FILE_CHOOSER_WAIT_MS })
+    .catch(() => undefined);
+  // Listening turns on Playwright's hold on file dialogs, but without waiting for the browser.
+  // The key goes by another connection, so one round trip lets the hold arrive first.
+  await frame.evaluate(() => undefined);
+  await pressKey(page, 'Enter');
+  const chooser = await opened;
+  if (!chooser) {
+    setLine('실패: 파일 선택 창이 열리지 않음');
+    throw pointAtUser(
+      new Error(
+        `${label}에서 Enter를 눌렀지만 파일 선택 창이 열리지 않았습니다: ${describeLocator(target)}`,
+      ),
+      stack,
+    );
+  }
+  await chooser.setFiles(call.args[0] as Parameters<FileChooser['setFiles']>[0], timeout);
+  setLine(`통과: ${describeMoves(result)}, ${label}에서 Enter, 열린 선택 창에 파일을 넣음`);
+  return undefined;
 }
 
 /**
