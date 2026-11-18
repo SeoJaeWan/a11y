@@ -101,6 +101,18 @@ export const scenario = defineE2eScenario({
       situation: '`dragTo`',
       e2e: `${E2E}/drag-to.spec.ts`,
       expected: {
+        status: 'failed',
+        error: '키보드로 실행할 수 없는 동작입니다: dragTo',
+        lines: ['5행 dragTo 실패: 키보드로 실행할 수 없는 동작'],
+        notices: [],
+      },
+    },
+    {
+      id: 'drag-to-pass-unsupported',
+      situation: '`dragTo`, 실행할 수 없는 동작을 통과로 설정',
+      e2e: `${E2E}/drag-to.spec.ts`,
+      config: 'playwright-pass-unsupported.config.ts',
+      expected: {
         status: 'passed',
         lines: [
           '5행 dragTo 검사하지 못함: 드래그는 키보드 대안이 필요한 동작이며 확인하지 못했습니다',
@@ -109,6 +121,62 @@ export const scenario = defineE2eScenario({
         notices: [
           '[journey-a11y] cases/run/drag-to.spec.ts:5 dragTo — 키보드로 검사하지 못했습니다',
         ],
+      },
+    },
+    {
+      id: 'drag-with-alternative',
+      situation: '`dragTo`, 주석이 대안 테스트를 가리킴',
+      e2e: `${E2E}/drag-with-alternative.spec.ts`,
+      expected: {
+        status: 'skipped',
+        skipped: '대안 테스트로 대체: 버튼으로 카드를 완료로 옮긴다',
+        lines: [],
+        notices: [],
+      },
+    },
+    {
+      id: 'move-with-button',
+      situation: '드래그의 대안인 버튼으로 옮기는 테스트',
+      e2e: `${E2E}/move-with-button.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 click 통과: Tab 4번, button "완료로 이동"에서 Enter',
+          '6행 click 통과: Tab 1번, button "저장"에서 Enter',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'drag-with-missing-alternative',
+      situation: '`dragTo`, 주석이 가리킨 대안 테스트가 없음',
+      e2e: `${E2E}/drag-with-missing-alternative.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: '주석이 가리킨 대안 테스트를 찾지 못했습니다: 메뉴로 카드를 완료로 옮긴다',
+        lines: [],
+        notices: [],
+      },
+    },
+    {
+      id: 'double-click-shortcut',
+      situation: '`dblclick`, 요소가 `aria-keyshortcuts`로 키를 표시',
+      e2e: `${E2E}/double-click-shortcut.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 dblclick 통과: Tab 4번, listitem에서 Enter (aria-keyshortcuts)'],
+        notices: [],
+      },
+    },
+    {
+      id: 'double-click-only',
+      situation: '`dblclick`, 키 표시 없음',
+      e2e: `${E2E}/double-click-only.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: '키보드로 실행할 수 없는 동작입니다: dblclick',
+        lines: ['5행 dblclick 실패: 키보드로 실행할 수 없는 동작'],
+        notices: [],
       },
     },
     {

@@ -32,11 +32,36 @@ Every test gets a text attachment, "키보드 실행", that lists what the keybo
 6행 click 통과: Tab 1번, button "취소 확정"에서 Enter
 ```
 
-Actions with no keyboard way yet, such as drag and double-click, run the original way and are reported as not checked, in the attachment and in the terminal. It does not judge whether the Tab order is natural, whether focus is visible, or whether names are announced.
+It does not judge whether the Tab order is natural, whether focus is visible, or whether names are announced.
+
+## Actions the keyboard cannot run
+
+An action with no keyboard way, such as a drag, fails on its line. A double-click runs with the key the element names in `aria-keyshortcuts`, and fails when it names none.
+
+If the same work can be done with the keyboard another way (a button, a menu) and a test covers that way, say so in a comment above the test. That test is skipped in the keyboard run, and the test it names is checked instead:
+
+```ts
+// a11y-alternative: moves the card to Done with the button
+test('drags the card to Done', async ({ page }) => {
+  await page.getByText('Write report').dragTo(page.getByRole('list', { name: 'Done' }));
+});
+
+test('moves the card to Done with the button', async ({ page }) => {
+  await page.getByRole('button', { name: 'Move to Done' }).click();
+});
+```
+
+The test fails when no test has the title the comment names.
+
+If you do not want these actions checked, let them through in the config. The line then runs the original way and is reported as not checked, in the attachment and in the terminal:
+
+```ts
+withA11y({ ... }, { unsupportedActions: 'pass' });
+```
 
 ## Usage
 
-No changes to your test files. Wrap your existing Playwright config once and turn the run on when you want it:
+No changes to what your tests do. Wrap your existing Playwright config once and turn the run on when you want it:
 
 ```ts
 // playwright.config.ts

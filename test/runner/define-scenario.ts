@@ -8,7 +8,9 @@ export type RunSettings = {
 
 /** What the tool leaves in Playwright for one test of an accessibility run. */
 export type Expected = {
-  status: 'passed' | 'failed';
+  status: 'passed' | 'failed' | 'skipped';
+  /** Reason the tool gives for skipping the test. Left out for a test that ran. */
+  skipped?: string;
   /** Text the error message of a failed test contains. Left out for a passed test. */
   error?: string;
   /** Lines of the "키보드 실행" attachment, one per action line of the E2E. */

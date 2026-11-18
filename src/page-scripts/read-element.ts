@@ -59,3 +59,12 @@ export function removeMark(element: Element, name: string): void {
 export function readLabelText(element: Element): string | null {
   return element instanceof HTMLLabelElement ? element.textContent.trim() : null;
 }
+
+/**
+ * Reads the `aria-keyshortcuts` of the target or of the nearest element around it that has one.
+ * Runs in the page, so it uses nothing from outside.
+ * @param target Element the test pointed at.
+ */
+export function findKeyShortcuts(target: Element): string | null {
+  return target.closest('[aria-keyshortcuts]')?.getAttribute('aria-keyshortcuts') ?? null;
+}

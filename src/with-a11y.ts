@@ -1,6 +1,8 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 import { interceptInProject } from './playwright-internal/intercept-in-project';
+import { useAlternative } from './run/alternative';
+import type { A11yOptions } from './run/handle-action';
 import { handleAction } from './run/handle-action';
 import { closeSummary, openSummary, SUMMARY_NAME } from './run/summary';
 
@@ -16,8 +18,12 @@ const DEFAULT_TEST_ID_ATTRIBUTE = 'data-testid';
  * runs tests in Chromium gets a copy that runs the same tests with the keyboard. The copy keeps
  * the project's settings, such as the signed-in state and the projects it depends on.
  * @param config Playwright config of the user's tests.
+ * @param options How the keyboard run treats what it cannot do.
  */
-export function withA11y(config: PlaywrightTestConfig): PlaywrightTestConfig {
+export function withA11y(
+  config: PlaywrightTestConfig,
+  options: A11yOptions = {},
+): PlaywrightTestConfig {
   if (!process.env.A11Y) return config;
   // A config without projects has one unnamed project; it must stay next to its copy.
   const projects: ProjectConfig[] = config.projects?.length ? config.projects : [{}];
@@ -32,8 +38,9 @@ export function withA11y(config: PlaywrightTestConfig): PlaywrightTestConfig {
       ...project.use,
       ...interceptInProject(
         {
-          onAction: handleAction,
+          onAction: (call) => handleAction(call, options),
           onTestStart: (testInfo) => {
+            useAlternative(testInfo);
             openSummary(testInfo.testId);
           },
           onTestEnd: async (testInfo) => {

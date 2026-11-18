@@ -1,4 +1,4 @@
-import type { JSONReportTestResult } from '@playwright/test/reporter';
+import type { JSONReportTest, JSONReportTestResult } from '@playwright/test/reporter';
 
 import type { Expected } from './define-scenario';
 
@@ -12,8 +12,21 @@ const ANSI_COLOR = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
 /**
  * Reads what the tool left in one test result of the Playwright JSON report.
  * @param result Last result of the accessibility run test.
+ * @param annotations Annotations of the test; a skipped test carries its reason there.
  */
-export function readActual(result: JSONReportTestResult): Expected {
+export function readActual(
+  result: JSONReportTestResult,
+  annotations: JSONReportTest['annotations'] = [],
+): Expected {
+  if (result.status === 'skipped') {
+    const reason = annotations.find((item) => item.type === 'skip')?.description;
+    return {
+      status: 'skipped',
+      ...(reason === undefined ? {} : { skipped: reason }),
+      lines: [],
+      notices: [],
+    };
+  }
   // A timed out test has two errors: the time limit, then the action that was still waiting.
   const messages = result.errors.map((item) => item.message);
   const error = messages.length > 0 ? messages.join('\n') : result.error?.message;
