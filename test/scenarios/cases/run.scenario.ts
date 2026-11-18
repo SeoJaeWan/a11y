@@ -111,5 +111,62 @@ export const scenario = defineE2eScenario({
         ],
       },
     },
+    {
+      id: 'right-click-menu',
+      situation: '우클릭으로 여는 메뉴',
+      e2e: `${E2E}/right-click-menu.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 click 통과: Tab 4번, listitem에서 Shift+F10',
+          '6행 click 통과: ↓ 1번, menuitem "예약 취소"에서 Enter',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'file-input',
+      situation: '보이는 파일 입력란',
+      e2e: `${E2E}/file-input.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 setInputFiles 통과: Tab 4번, button "프로필 사진"에서 Enter, 열린 선택 창에 파일을 넣음',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'file-input-label-only',
+      situation: '숨긴 파일 입력란, 키 처리가 없는 `label`',
+      e2e: `${E2E}/file-input-label-only.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: 'label "올리기"에서 Enter를 눌렀지만 파일 선택 창이 열리지 않았습니다',
+        lines: ['5행 setInputFiles 실패: 파일 선택 창이 열리지 않음'],
+        notices: [],
+      },
+    },
+    {
+      id: 'file-input-script-button',
+      situation: '숨긴 파일 입력란, 연결된 `label` 없음',
+      e2e: `${E2E}/file-input-script-button.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: '화면에 보이지 않고, 화면에 보이는 연결된 label도 없습니다',
+        lines: ['5행 setInputFiles 실패: 닿을 수 없음'],
+        notices: [],
+      },
+    },
+    {
+      id: 'file-chooser-button',
+      situation: '파일 선택 창을 여는 버튼을 `click`',
+      e2e: `${E2E}/file-chooser-button.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['6행 click 통과: Tab 4번, button "올리기"에서 Enter'],
+        notices: [],
+      },
+    },
   ],
 });

@@ -49,3 +49,13 @@ export function setMark(element: Element, name: string): void {
 export function removeMark(element: Element, name: string): void {
   element.removeAttribute(name);
 }
+
+/**
+ * Reads the text of a `label` element, or nothing for any other element. A label has no role
+ * of its own, so results name it by its tag.
+ * Runs in the page, so it uses nothing from outside.
+ * @param element Element the keyboard reached.
+ */
+export function readLabelText(element: Element): string | null {
+  return element instanceof HTMLLabelElement ? element.textContent.trim() : null;
+}
