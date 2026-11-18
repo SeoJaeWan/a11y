@@ -5,7 +5,12 @@ import { test } from '@playwright/test';
 
 import { OWN_DIR } from '../own-dir';
 import { findFileOpener } from '../page-scripts/find-file-opener';
-import { isChecked, previewElement, readLabelText } from '../page-scripts/read-element';
+import {
+  findKeyShortcuts,
+  isChecked,
+  previewElement,
+  readLabelText,
+} from '../page-scripts/read-element';
 import { describeLocator } from '../playwright-internal/describe-locator';
 import type { Caller } from './caller';
 import { findCaller, userFrames } from './caller';
@@ -15,6 +20,7 @@ import { pressKey } from './keys';
 import { arrowSymbol, describeMoves } from './moves';
 import type { Reach } from './reach';
 import { reach, reachElement } from './reach';
+import { pickShortcut } from './shortcut';
 import { reserveLine } from './summary';
 
 /** Name each intercepted action shows in results, by its frame method. */
@@ -48,8 +54,18 @@ export type ActionCall = {
 
 type ActionOptions = { strict?: boolean; timeout?: number; button?: string };
 
-/** Actions with no agreed keyboard way yet. They run the original way and are reported. */
-const NOT_CHECKED_ACTIONS = new Set<ActionName>(['dragAndDrop', 'dblclick', 'tap']);
+/** How the keyboard run treats what it cannot do. */
+export type A11yOptions = {
+  /**
+   * What to do with an action that has no keyboard way, such as a drag. `fail` (the default)
+   * fails the test on that line. `pass` runs the action the original way, lets the test go on,
+   * and reports the line as not checked.
+   */
+  unsupportedActions?: 'fail' | 'pass';
+};
+
+/** Actions with no keyboard way of their own. */
+const UNSUPPORTED_ACTIONS = new Set<ActionName>(['dragAndDrop', 'dblclick', 'tap']);
 const NOT_CHECKED = '검사하지 못함: 키보드로 바꿔 실행하는 방법이 정해지지 않은 동작입니다';
 const NOT_CHECKED_DRAG =
   '검사하지 못함: 드래그는 키보드 대안이 필요한 동작이며 확인하지 못했습니다';
@@ -69,29 +85,51 @@ const ENABLED_POLL_MS = 50;
 /**
  * Runs one action of the test with the keyboard and records what happened on its line.
  * @param call Intercepted action.
+ * @param settings Options the user gave `withA11y`.
  */
-export async function handleAction(call: ActionCall): Promise<unknown> {
+export async function handleAction(call: ActionCall, settings: A11yOptions): Promise<unknown> {
   const caller = findCaller(call.stack, OWN_DIR);
-  return test.step(`${DISPLAY_NAMES[call.name]} (키보드)`, () => runWithKeyboard(call, caller), {
-    // Not boxed: a boxed step hides the code line of the test from the error.
-    box: false,
-    ...(caller ? { location: caller } : {}),
-  });
+  return test.step(
+    `${DISPLAY_NAMES[call.name]} (키보드)`,
+    () => runWithKeyboard(call, caller, settings),
+    {
+      // Not boxed: a boxed step hides the code line of the test from the error.
+      box: false,
+      ...(caller ? { location: caller } : {}),
+    },
+  );
 }
 
 /**
  * Reaches the target with the keyboard and acts on it the way its kind of action needs.
  * @param call Intercepted action.
  * @param caller Line of the user's test that called the action.
+ * @param settings Options the user gave `withA11y`.
  */
-async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Promise<unknown> {
+async function runWithKeyboard(
+  call: ActionCall,
+  caller: Caller | undefined,
+  settings: A11yOptions,
+): Promise<unknown> {
   const { name, frame, args } = call;
   const options = readOptions(args.at(-1));
   const prefix = `${caller ? String(caller.line) : '?'}행 ${DISPLAY_NAMES[name]}`;
   const button = options.button ?? 'left';
+  const locator = frame.locator(call.selector);
+  // `page.click(selector)` is not strict: like Playwright, it acts on the first match.
+  const target = options.strict === true ? locator : locator.first();
+  const page = frame.page();
+
+  // A double click has a keyboard way only when the site names a key on the element.
+  const shortcut =
+    name === 'dblclick' ? await readShortcut(call, target, options, prefix) : undefined;
   // The middle button has no key; the right button has the context menu key.
   const isMouseOnlyClick = name === 'click' && button !== 'left' && button !== 'right';
-  if (NOT_CHECKED_ACTIONS.has(name) || isMouseOnlyClick) {
+  if ((UNSUPPORTED_ACTIONS.has(name) && shortcut === undefined) || isMouseOnlyClick) {
+    if (settings.unsupportedActions !== 'pass') {
+      reserveLine(prefix, '실패: 키보드로 실행할 수 없는 동작');
+      throw pointAtUser(new Error(describeUnsupported(name)), call.stack);
+    }
     // Nothing passes silently: an action the keyboard did not run is said to be unchecked.
     reserveLine(prefix, name === 'dragAndDrop' ? NOT_CHECKED_DRAG : NOT_CHECKED);
     console.log(
@@ -100,10 +138,6 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
     return call.runOriginal();
   }
 
-  const locator = frame.locator(call.selector);
-  // `page.click(selector)` is not strict: like Playwright, it acts on the first match.
-  const target = options.strict === true ? locator : locator.first();
-  const page = frame.page();
   if (name === 'setInputFiles') return uploadWithKeyboard(call, target, options, prefix);
   const setLine = reserveLine(prefix, '실패: 목표가 화면에 나타나지 않음');
   try {
@@ -174,9 +208,56 @@ async function runWithKeyboard(call: ActionCall, caller: Caller | undefined): Pr
       setLine(`통과: ${moves}, ${label}으로 포커스 이동`);
       return undefined;
     }
+    case 'dblclick': {
+      if (shortcut === undefined) return call.runOriginal();
+      try {
+        // The key comes from the site, so any key name can appear; Playwright knows them all.
+        await page.keyboard.press(shortcut);
+      } catch (error) {
+        throw pointAtUser(error, call.stack);
+      }
+      setLine(`통과: ${moves}, ${label}에서 ${shortcut} (aria-keyshortcuts)`);
+      return undefined;
+    }
     default:
       return call.runOriginal();
   }
+}
+
+/**
+ * Reads the key the site names for the target of a double click, if any.
+ * @param call Intercepted `dblclick` action.
+ * @param target Element the test pointed at.
+ * @param options Options the test gave the action.
+ * @param prefix Line number and action name for the summary.
+ */
+async function readShortcut(
+  call: ActionCall,
+  target: Locator,
+  options: ActionOptions,
+  prefix: string,
+): Promise<string | undefined> {
+  try {
+    const timeout = options.timeout === undefined ? {} : { timeout: options.timeout };
+    return pickShortcut(await target.evaluate(findKeyShortcuts, undefined, timeout));
+  } catch (error) {
+    reserveLine(prefix, '실패: 목표가 페이지에 나타나지 않음');
+    throw pointAtUser(error, call.stack);
+  }
+}
+
+/**
+ * Writes why an action cannot run with the keyboard and what the developer can do about it.
+ * @param name Action the test called.
+ */
+function describeUnsupported(name: ActionName): string {
+  const hint =
+    name === 'dblclick' ? '요소에 aria-keyshortcuts로 키를 적어 두면 그 키로 실행합니다.\n' : '';
+  return (
+    `키보드로 실행할 수 없는 동작입니다: ${DISPLAY_NAMES[name]}\n${hint}` +
+    '같은 일을 키보드로 하는 테스트가 있다면 이 테스트 위에 ' +
+    '"// a11y-alternative: <그 테스트의 제목>"을 적어 주세요.'
+  );
 }
 
 /**

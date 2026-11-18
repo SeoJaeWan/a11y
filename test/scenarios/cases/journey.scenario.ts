@@ -2,7 +2,6 @@ import { defineE2eScenario } from '../../runner/define-scenario';
 
 const E2E = 'e2e/cases/journey';
 const FILLED = '값은 원래 방식으로 입력';
-const NOT_CHECKED = '검사하지 못함: 키보드로 바꿔 실행하는 방법이 정해지지 않은 동작입니다';
 
 export const scenario = defineE2eScenario({
   name: '여정',
@@ -75,14 +74,12 @@ export const scenario = defineE2eScenario({
       expected: {
         status: 'passed',
         lines: [
-          `6행 dblclick ${NOT_CHECKED}`,
+          '6행 dblclick 통과: Tab 8번, button "별점 5점"에서 Enter (aria-keyshortcuts)',
           `7행 fill 통과: Tab 1번, textbox "후기 내용"에 닿음, ${FILLED}`,
           '8행 setInputFiles 통과: Tab 1번, button "사진 첨부"에서 Enter, 열린 선택 창에 파일을 넣음',
           '9행 click 통과: Tab 1번, button "등록"에서 Enter',
         ],
-        notices: [
-          '[journey-a11y] cases/journey/review-write.spec.ts:6 dblclick — 키보드로 검사하지 못했습니다',
-        ],
+        notices: [],
       },
     },
   ],

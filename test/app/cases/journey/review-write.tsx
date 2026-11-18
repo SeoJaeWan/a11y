@@ -4,7 +4,7 @@ import { SiteLayout } from '../../layout/site-layout';
 
 const STARS = [1, 2, 3, 4, 5];
 
-/** Review form: stars set by double-click, a custom editor, a photo, then submit. */
+/** Review form: stars set by double-click or the key they name, an editor, a photo, then submit. */
 export function Page(): React.JSX.Element {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState('');
@@ -17,8 +17,12 @@ export function Page(): React.JSX.Element {
           <button
             key={star}
             type="button"
+            aria-keyshortcuts="Enter"
             onDoubleClick={() => {
               setRating(star);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') setRating(star);
             }}
           >
             별점 {star}점

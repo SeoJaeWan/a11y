@@ -38,7 +38,7 @@ export function readInnerResult(group: string, e2e: string): InnerResult {
   return {
     plain: tests.find((test) => test.projectName === 'chromium'),
     a11y,
-    actual: lastResult ? readActual(lastResult) : undefined,
+    actual: lastResult ? readActual(lastResult, a11y?.annotations) : undefined,
     tracePath: lastResult?.attachments.find((item) => item.name === 'trace')?.path,
   };
 }
