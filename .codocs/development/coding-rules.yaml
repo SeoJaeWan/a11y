@@ -201,10 +201,11 @@ CI 환경: |
   |---|---|---|
   | 정적 검사, 버전별 시나리오 | Linux(`ubuntu-latest`) | [[코드 작성 규칙:CI 작업]] 전부 |
   | Windows 시나리오 | Windows | 고정 버전 하나로 시나리오만, PR마다. 결과는 `시나리오 결과`에 포함한다 |
+  | macOS 시나리오 | macOS | 고정 버전 하나로 시나리오만, PR마다. 실패해도 PR을 막지 않는다 |
 
   - Linux: Playwright 공식 CI 예시가 모두 `ubuntu-latest`다. 다만 버전별 시나리오는 `ubuntu-24.04`로 고정한다. `ubuntu-latest`가 Ubuntu 26.04가 되면서 Playwright 1.60 이하는 "chromium-headless-shell on ubuntu26.04 지원 안 함"으로 설치에 실패했다(2026-11 CI 확인). 24.04 러너가 없어지면 그때 지원 하한을 다시 본다.
   - Windows: 도구가 사용자 설정 파일을 읽고 결과 파일과 trace를 저장해 경로 구분자 같은 Windows 전용 문제가 생기기 쉽고, 개발 환경도 Windows다. playwright-bdd도 Windows 전용 작업을 따로 둔다. 버전 전체를 Windows로 돌리면 시간만 늘어 하나만 둔다.
-  - macOS는 Chromium만 지원하는 버전 1에서 두지 않는다.
+  - macOS: 고정 버전 하나로 시나리오만 PR마다 돌리되, 실패해도 PR을 막지 않고 `시나리오 결과`에도 넣지 않는다. 2026-11 결정이다. 처음에는 Chromium만 지원한다는 이유로 두지 않았으나, 우클릭의 Shift+F10처럼 운영체제에 따라 달라질 수 있는 키가 들어오면서 macOS에서 무엇이 깨지는지부터 알아야 했다. 결과를 본 뒤 필수 검사로 올릴지 정한다.
 
   설치와 캐시:
   - 브라우저는 작업마다 `npx playwright install --with-deps --only-shell chromium`으로 받고 캐시하지 않는다. Playwright 문서는 "캐시를 복원하는 시간이 내려받는 시간과 비슷하고" Linux의 운영체제 의존성은 캐시할 수 없어 브라우저 캐시를 권장하지 않는다(2026-11 확인).
