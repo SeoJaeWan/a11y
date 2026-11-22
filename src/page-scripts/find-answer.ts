@@ -13,8 +13,15 @@ export function findAnswer(target: Element): Element | null {
   );
   // An item of an arrow-key group is reached with arrows, even when it never takes focus itself.
   if (item && group) return item;
-  const focusable = target.closest(
-    'a[href], button, input:not([type="hidden"]), select, textarea, summary, [tabindex], [contenteditable=""], [contenteditable="true"]',
-  );
-  return focusable?.matches(':disabled') ? null : focusable;
+  let from: Element | null = target;
+  while (from) {
+    const focusable: Element | null = from.closest(
+      'a[href], button, input:not([type="hidden"]), select, textarea, summary, [tabindex], [contenteditable=""], [contenteditable="true"]',
+    );
+    if (focusable) return focusable.matches(':disabled') ? null : focusable;
+    // `closest` stops at a shadow root; the element around it is the host of that root.
+    const root = from.getRootNode();
+    from = root instanceof ShadowRoot ? root.host : null;
+  }
+  return null;
 }

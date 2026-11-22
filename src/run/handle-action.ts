@@ -14,7 +14,7 @@ import {
 import { describeLocator } from '../playwright-internal/describe-locator';
 import type { Caller } from './caller';
 import { findCaller, userFrames } from './caller';
-import { describeElement } from './describe-element';
+import { describeElement, describeFrame } from './describe-element';
 import { roleOf } from './element-label';
 import { pressKey } from './keys';
 import { arrowSymbol, describeMoves } from './moves';
@@ -165,7 +165,8 @@ async function runWithKeyboard(
     throw pointAtUser(new Error(describeFailure(target, result)), call.stack);
   }
 
-  const label = await describeElement(frame, result.answer);
+  const element = await describeElement(frame, result.answer);
+  const label = (await describeFrame(result.answer)) + element;
   const moves = describeMoves(result);
   switch (name) {
     case 'click': {
@@ -174,7 +175,7 @@ async function runWithKeyboard(
         setLine(`통과: ${moves}, ${label}에서 Shift+F10`);
         return undefined;
       }
-      const key = SPACE_ROLES.has(roleOf(label)) ? 'Space' : 'Enter';
+      const key = SPACE_ROLES.has(roleOf(element)) ? 'Space' : 'Enter';
       await pressKey(page, key);
       setLine(`통과: ${moves}, ${label}에서 ${key}`);
       return undefined;
@@ -307,8 +308,9 @@ async function uploadWithKeyboard(
   }
 
   const labelText = await result.answer.evaluate(readLabelText);
-  const label =
+  const element =
     labelText === null ? await describeElement(frame, result.answer) : `label "${labelText}"`;
+  const label = (await describeFrame(result.answer)) + element;
   const opened = page
     .waitForEvent('filechooser', { timeout: FILE_CHOOSER_WAIT_MS })
     .catch(() => undefined);

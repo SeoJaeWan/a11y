@@ -17,9 +17,13 @@ export type Visits = { seen: WeakSet<Element>; last: Element | null };
  * @param visits Elements focus has already visited in this search.
  */
 export function checkFocus(answer: Element, visits: Visits): FocusPlace {
-  const active = document.activeElement ?? document.body;
+  // The document the answer is in: its own frame's when the answer is inside an iframe.
+  let active = answer.ownerDocument.activeElement ?? answer.ownerDocument.body;
+  // Focus inside a shadow root shows on the document as its host; the real element is inside.
+  while (active.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
   const pointedId = active.getAttribute('aria-activedescendant');
-  const current = (pointedId ? document.getElementById(pointedId) : null) ?? active;
+  const pointed = pointedId ? (active.getRootNode() as Document).getElementById(pointedId) : null;
+  const current = pointed ?? active;
   // One key can leave focus where it is, as inside a date field with several parts. Only coming
   // back to an element after being somewhere else is a round.
   const isRepeat = visits.seen.has(current) && visits.last !== current;
@@ -50,6 +54,21 @@ export function checkFocus(answer: Element, visits: Visits): FocusPlace {
       (group.contains(current) || (group.id !== '' && controlled.split(/\s+/).includes(group.id)));
   }
   return { at: isInGroup ? 'group' : 'other', isRepeat };
+}
+
+/**
+ * Says whether focus in the top document is back on an element it has already left. Used when
+ * the answer is inside an iframe: the frame's own document cannot see focus going round outside.
+ * Runs in the page, so it uses nothing from outside.
+ * @param visits Elements of the top document focus has already visited in this search.
+ */
+export function checkRound(visits: Visits): boolean {
+  let active = document.activeElement ?? document.body;
+  while (active.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+  const isRepeat = visits.seen.has(active) && visits.last !== active;
+  visits.seen.add(active);
+  visits.last = active;
+  return isRepeat;
 }
 
 /**
