@@ -187,6 +187,36 @@ jobs:
           include-hidden-files: true
           retention-days: 14
 
+  scenarios-macos:
+    name: 시나리오 (macOS)
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.docs-only != 'true'
+    runs-on: macos-latest
+    # Not confirmed on macOS yet: a failure here is shown but does not block the pull request.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --only-shell chromium
+      - run: pnpm test:scenarios
+      - if: always()
+        env:
+          SCENARIO_LABEL: macOS
+        run: node scripts/scenario-summary.ts
+      - name: 리포트 올리기 (실패)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: scenario-report-macos
+          path: test/.report
+          include-hidden-files: true
+          retention-days: 14
+
   scenario-results:
     name: 시나리오 결과
     needs: [changes, versions, scenarios, scenarios-windows]
