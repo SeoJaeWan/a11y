@@ -224,6 +224,43 @@ export const scenario = defineE2eScenario({
       },
     },
     {
+      id: 'right-click-shortcut',
+      situation: '우클릭, 요소가 `aria-keyshortcuts`로 키를 표시',
+      e2e: `${E2E}/right-click-shortcut.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 click 통과: Tab 4번, listitem에서 Alt+M (aria-keyshortcuts)',
+          '6행 click 통과: ↓ 1번, menuitem "예약 취소"에서 Enter',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'right-click-menu-button',
+      situation: '우클릭, 요소가 메뉴 버튼(`aria-haspopup="menu"`)',
+      e2e: `${E2E}/right-click-menu-button.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 click 통과: Tab 4번, button "11월 20일 서울 호텔"에서 Enter (aria-haspopup)',
+          '6행 click 통과: ↓ 1번, menuitem "예약 취소"에서 Enter',
+        ],
+        notices: [],
+      },
+    },
+    {
+      id: 'right-click-menu-button-other-action',
+      situation: '우클릭, 메뉴 버튼 표시가 있지만 Enter가 메뉴를 열지 않음',
+      e2e: `${E2E}/right-click-menu-button-other-action.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: 'Enter를 눌렀지만 메뉴(role="menu")가 열리지 않았습니다',
+        lines: ['5행 click 실패: Enter를 눌렀지만 메뉴가 열리지 않음'],
+        notices: [],
+      },
+    },
+    {
       id: 'file-input',
       situation: '보이는 파일 입력란',
       e2e: `${E2E}/file-input.spec.ts`,
