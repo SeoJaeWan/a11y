@@ -6,7 +6,7 @@ import { test } from '@playwright/test';
 import { OWN_DIR } from '../own-dir';
 import { findFileOpener } from '../page-scripts/find-file-opener';
 import {
-  findKeyShortcuts,
+  findKeyHints,
   isChecked,
   isMacBrowser,
   previewElement,
@@ -80,6 +80,9 @@ const SPACE_ROLES = new Set(['checkbox', 'radio', 'switch']);
  */
 const FILE_CHOOSER_WAIT_MS = 2000;
 
+/** How long to wait for a menu after Enter on a menu button. It opens while the key is handled. */
+const MENU_WAIT_MS = 2000;
+
 /** How often to look again while waiting for a disabled element to turn on. */
 const ENABLED_POLL_MS = 50;
 
@@ -121,13 +124,19 @@ async function runWithKeyboard(
   const target = options.strict === true ? locator : locator.first();
   const page = frame.page();
 
-  // A double click has a keyboard way only when the site names a key on the element.
-  const shortcut =
-    name === 'dblclick' ? await readShortcut(call, target, options, prefix) : undefined;
+  // A double click has a keyboard way only when the site names a key on the element. A right
+  // click uses the key the site names too, or Enter when the element is a menu button.
+  const isRightClick = name === 'click' && button === 'right';
+  const hints =
+    name === 'dblclick' || isRightClick
+      ? await readKeyHints(call, target, options, prefix)
+      : undefined;
+  const shortcut = hints?.shortcut;
+  const isMenuButton = isRightClick && shortcut === undefined && hints?.isMenuButton === true;
   // The middle button has no key. The right button has the context menu key, but not on macOS:
   // Shift+F10 opens nothing there and a Mac keyboard has no context menu key.
   const isMacRightClick =
-    name === 'click' && button === 'right' && (await frame.evaluate(isMacBrowser));
+    isRightClick && shortcut === undefined && !isMenuButton && (await frame.evaluate(isMacBrowser));
   const isMouseOnlyClick =
     name === 'click' && button !== 'left' && (button !== 'right' || isMacRightClick);
   if ((UNSUPPORTED_ACTIONS.has(name) && shortcut === undefined) || isMouseOnlyClick) {
@@ -175,7 +184,30 @@ async function runWithKeyboard(
   const moves = describeMoves(result);
   switch (name) {
     case 'click': {
-      if (button === 'right') {
+      if (isRightClick && shortcut !== undefined) {
+        await pressShortcut(call, shortcut);
+        setLine(`통과: ${moves}, ${label}에서 ${shortcut} (aria-keyshortcuts)`);
+        return undefined;
+      }
+      if (isMenuButton) {
+        // A menu button promises a menu on Enter, so the menu is looked for right away.
+        const ownFrame = (await result.answer.ownerFrame()) ?? frame;
+        const menus = ownFrame.locator('[role="menu"]:visible');
+        const before = await menus.count();
+        await pressKey(page, 'Enter');
+        if (!(await waitForMore(menus, before))) {
+          setLine('실패: Enter를 눌렀지만 메뉴가 열리지 않음');
+          throw pointAtUser(
+            new Error(
+              `aria-haspopup="menu"인 ${label}에서 Enter를 눌렀지만 메뉴(role="menu")가 열리지 않았습니다: ${describeLocator(target)}`,
+            ),
+            call.stack,
+          );
+        }
+        setLine(`통과: ${moves}, ${label}에서 Enter (aria-haspopup)`);
+        return undefined;
+      }
+      if (isRightClick) {
         await pressKey(page, 'Shift+F10');
         setLine(`통과: ${moves}, ${label}에서 Shift+F10`);
         return undefined;
@@ -216,12 +248,7 @@ async function runWithKeyboard(
     }
     case 'dblclick': {
       if (shortcut === undefined) return call.runOriginal();
-      try {
-        // The key comes from the site, so any key name can appear; Playwright knows them all.
-        await page.keyboard.press(shortcut);
-      } catch (error) {
-        throw pointAtUser(error, call.stack);
-      }
+      await pressShortcut(call, shortcut);
       setLine(`통과: ${moves}, ${label}에서 ${shortcut} (aria-keyshortcuts)`);
       return undefined;
     }
@@ -237,18 +264,47 @@ async function runWithKeyboard(
  * @param options Options the test gave the action.
  * @param prefix Line number and action name for the summary.
  */
-async function readShortcut(
+async function readKeyHints(
   call: ActionCall,
   target: Locator,
   options: ActionOptions,
   prefix: string,
-): Promise<string | undefined> {
+): Promise<{ shortcut: string | undefined; isMenuButton: boolean }> {
   try {
     const timeout = options.timeout === undefined ? {} : { timeout: options.timeout };
-    return pickShortcut(await target.evaluate(findKeyShortcuts, undefined, timeout));
+    const hints = await target.evaluate(findKeyHints, undefined, timeout);
+    return { shortcut: pickShortcut(hints.shortcuts), isMenuButton: hints.isMenuButton };
   } catch (error) {
     reserveLine(prefix, '실패: 목표가 페이지에 나타나지 않음');
     throw pointAtUser(error, call.stack);
+  }
+}
+
+/**
+ * Presses the key the site names for an element.
+ * @param call Intercepted action.
+ * @param shortcut Key from `aria-keyshortcuts`, e.g. `Alt+M`.
+ */
+async function pressShortcut(call: ActionCall, shortcut: string): Promise<void> {
+  try {
+    // The key comes from the site, so any key name can appear; Playwright knows them all.
+    await call.frame.page().keyboard.press(shortcut);
+  } catch (error) {
+    throw pointAtUser(error, call.stack);
+  }
+}
+
+/**
+ * Waits a short while for more elements to match than before the key.
+ * @param matches Locator of the elements to count.
+ * @param before How many matched before the key.
+ */
+async function waitForMore(matches: Locator, before: number): Promise<boolean> {
+  const deadline = Date.now() + MENU_WAIT_MS;
+  for (;;) {
+    if ((await matches.count()) > before) return true;
+    if (Date.now() >= deadline) return false;
+    await matches.page().waitForTimeout(ENABLED_POLL_MS);
   }
 }
 

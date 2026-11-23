@@ -60,13 +60,26 @@ export function readLabelText(element: Element): string | null {
   return element instanceof HTMLLabelElement ? element.textContent.trim() : null;
 }
 
+/** What the page tells a keyboard user about the keys of an element. */
+export type KeyHints = {
+  /** Value of `aria-keyshortcuts`, or nothing when it is not set. */
+  shortcuts: string | null;
+  /** Whether the element says it opens a menu, as a menu button does. */
+  isMenuButton: boolean;
+};
+
 /**
- * Reads the `aria-keyshortcuts` of the target or of the nearest element around it that has one.
- * Runs in the page, so it uses nothing from outside.
+ * Reads the `aria-keyshortcuts` and `aria-haspopup` of the target, or of the nearest element
+ * around it that has one. Runs in the page, so it uses nothing from outside.
  * @param target Element the test pointed at.
  */
-export function findKeyShortcuts(target: Element): string | null {
-  return target.closest('[aria-keyshortcuts]')?.getAttribute('aria-keyshortcuts') ?? null;
+export function findKeyHints(target: Element): KeyHints {
+  const popup = target.closest('[aria-haspopup]')?.getAttribute('aria-haspopup');
+  return {
+    shortcuts: target.closest('[aria-keyshortcuts]')?.getAttribute('aria-keyshortcuts') ?? null,
+    // ARIA defines `true` as the same as `menu`.
+    isMenuButton: popup === 'menu' || popup === 'true',
+  };
 }
 
 /** Tells whether the browser runs on macOS, where no key opens the context menu. */
