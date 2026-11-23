@@ -168,5 +168,46 @@ export const scenario = defineE2eScenario({
         notices: [],
       },
     },
+    {
+      id: 'button-in-iframe',
+      situation: 'iframe 안의 버튼',
+      e2e: `${E2E}/button-in-iframe.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 click 통과: Tab 4번, iframe "결제 창" 안의 button "결제하기"에서 Enter'],
+        notices: [],
+      },
+    },
+    {
+      id: 'button-in-untitled-iframe',
+      situation: '`title` 없는 iframe 안의 버튼',
+      e2e: `${E2E}/button-in-untitled-iframe.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 click 통과: Tab 4번, iframe 안의 button "결제하기"에서 Enter'],
+        notices: [],
+      },
+    },
+    {
+      id: 'negative-tabindex-in-iframe',
+      situation: 'iframe 안의 `tabindex="-1"` 버튼',
+      e2e: `${E2E}/negative-tabindex-in-iframe.spec.ts`,
+      expected: {
+        status: 'failed',
+        error: 'Tab을 한 바퀴(5번) 눌렀지만 목표에 포커스가 오지 않았습니다',
+        lines: ['5행 click 실패: 닿을 수 없음'],
+        notices: [],
+      },
+    },
+    {
+      id: 'button-in-shadow-dom',
+      situation: 'shadow DOM 안의 버튼',
+      e2e: `${E2E}/button-in-shadow-dom.spec.ts`,
+      expected: {
+        status: 'passed',
+        lines: ['5행 click 통과: Tab 4번, button "소식 받기"에서 Enter'],
+        notices: [],
+      },
+    },
   ],
 });

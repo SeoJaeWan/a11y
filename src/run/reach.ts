@@ -1,6 +1,6 @@
 import type { ElementHandle, Locator, Page } from '@playwright/test';
 
-import { checkFocus, createVisits } from '../page-scripts/check-focus';
+import { checkFocus, checkRound, createVisits } from '../page-scripts/check-focus';
 import { findAnswer } from '../page-scripts/find-answer';
 import { findArrowKey, previewElement } from '../page-scripts/read-element';
 import { pressKey } from './keys';
@@ -37,12 +37,21 @@ export async function reachElement(page: Page, target: ElementHandle<Element>): 
 
   let tabs = 0;
   const seenByTab = await answer.evaluateHandle(createVisits);
+  // An answer inside an iframe sees only its own document, where focus rests on the body while
+  // it goes round outside. The top document is watched too, so the search still ends.
+  const top = page.mainFrame();
+  const seenInTop =
+    (await answer.ownerFrame()) === top ? undefined : await top.evaluateHandle(createVisits);
+  if (seenInTop) await top.evaluate(checkRound, seenInTop);
   let place = await answer.evaluate(checkFocus, seenByTab);
   while (place.at === 'other') {
     await pressKey(page, 'Tab');
     tabs += 1;
     place = await answer.evaluate(checkFocus, seenByTab);
-    if (place.at === 'other' && place.isRepeat) return { kind: 'round', key: 'Tab', presses: tabs };
+    const isTopRound = seenInTop ? await top.evaluate(checkRound, seenInTop) : false;
+    if (place.at === 'other' && (place.isRepeat || isTopRound)) {
+      return { kind: 'round', key: 'Tab', presses: tabs };
+    }
   }
 
   let arrows = 0;
