@@ -8,6 +8,7 @@ import { findFileOpener } from '../page-scripts/find-file-opener';
 import {
   findKeyShortcuts,
   isChecked,
+  isMacBrowser,
   previewElement,
   readLabelText,
 } from '../page-scripts/read-element';
@@ -123,12 +124,16 @@ async function runWithKeyboard(
   // A double click has a keyboard way only when the site names a key on the element.
   const shortcut =
     name === 'dblclick' ? await readShortcut(call, target, options, prefix) : undefined;
-  // The middle button has no key; the right button has the context menu key.
-  const isMouseOnlyClick = name === 'click' && button !== 'left' && button !== 'right';
+  // The middle button has no key. The right button has the context menu key, but not on macOS:
+  // Shift+F10 opens nothing there and a Mac keyboard has no context menu key.
+  const isMacRightClick =
+    name === 'click' && button === 'right' && (await frame.evaluate(isMacBrowser));
+  const isMouseOnlyClick =
+    name === 'click' && button !== 'left' && (button !== 'right' || isMacRightClick);
   if ((UNSUPPORTED_ACTIONS.has(name) && shortcut === undefined) || isMouseOnlyClick) {
     if (settings.unsupportedActions !== 'pass') {
       reserveLine(prefix, '실패: 키보드로 실행할 수 없는 동작');
-      throw pointAtUser(new Error(describeUnsupported(name)), call.stack);
+      throw pointAtUser(new Error(describeUnsupported(name, isMacRightClick)), call.stack);
     }
     // Nothing passes silently: an action the keyboard did not run is said to be unchecked.
     reserveLine(prefix, name === 'dragAndDrop' ? NOT_CHECKED_DRAG : NOT_CHECKED);
@@ -250,12 +255,16 @@ async function readShortcut(
 /**
  * Writes why an action cannot run with the keyboard and what the developer can do about it.
  * @param name Action the test called.
+ * @param isMacRightClick Whether the action is a right click in a browser on macOS.
  */
-function describeUnsupported(name: ActionName): string {
-  const hint =
-    name === 'dblclick' ? '요소에 aria-keyshortcuts로 키를 적어 두면 그 키로 실행합니다.\n' : '';
+function describeUnsupported(name: ActionName, isMacRightClick: boolean): string {
+  const action = isMacRightClick ? '우클릭' : DISPLAY_NAMES[name];
+  let hint = '';
+  if (name === 'dblclick') hint = '요소에 aria-keyshortcuts로 키를 적어 두면 그 키로 실행합니다.\n';
+  // The same test passes on other systems, so the message says why it fails here.
+  if (isMacRightClick) hint = 'macOS에는 우클릭 메뉴를 여는 키가 없습니다.\n';
   return (
-    `키보드로 실행할 수 없는 동작입니다: ${DISPLAY_NAMES[name]}\n${hint}` +
+    `키보드로 실행할 수 없는 동작입니다: ${action}\n${hint}` +
     '같은 일을 키보드로 하는 테스트가 있다면 이 테스트 위에 ' +
     '"// a11y-alternative: <그 테스트의 제목>"을 적어 주세요.'
   );

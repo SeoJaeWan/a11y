@@ -191,6 +191,37 @@ export const scenario = defineE2eScenario({
         ],
         notices: [],
       },
+      expectedOnMac: {
+        status: 'failed',
+        error:
+          '키보드로 실행할 수 없는 동작입니다: 우클릭\nmacOS에는 우클릭 메뉴를 여는 키가 없습니다.',
+        lines: ['5행 click 실패: 키보드로 실행할 수 없는 동작'],
+        notices: [],
+      },
+    },
+    {
+      id: 'right-click-menu-pass-unsupported',
+      situation: '우클릭으로 여는 메뉴, 실행할 수 없는 동작을 통과로 설정',
+      e2e: `${E2E}/right-click-menu.spec.ts`,
+      config: 'playwright-pass-unsupported.config.ts',
+      expected: {
+        status: 'passed',
+        lines: [
+          '5행 click 통과: Tab 4번, listitem에서 Shift+F10',
+          '6행 click 통과: ↓ 1번, menuitem "예약 취소"에서 Enter',
+        ],
+        notices: [],
+      },
+      expectedOnMac: {
+        status: 'passed',
+        lines: [
+          '5행 click 검사하지 못함: 키보드로 바꿔 실행하는 방법이 정해지지 않은 동작입니다',
+          '6행 click 통과: ↓ 1번, menuitem "예약 취소"에서 Enter',
+        ],
+        notices: [
+          '[journey-a11y] cases/run/right-click-menu.spec.ts:5 click — 키보드로 검사하지 못했습니다',
+        ],
+      },
     },
     {
       id: 'file-input',

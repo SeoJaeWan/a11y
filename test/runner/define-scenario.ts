@@ -30,6 +30,8 @@ export type ScenarioCase = RunSettings & {
   /** E2E file relative to test/, e.g. `e2e/cases/reach/plain-button.spec.ts`. */
   e2e: string;
   expected: Expected | NoA11yRun;
+  /** What the tool leaves when the run is on macOS, where it differs from `expected`. */
+  expectedOnMac?: Expected;
 };
 
 /** Scenario cases of one group (reach, run, toggle). */
