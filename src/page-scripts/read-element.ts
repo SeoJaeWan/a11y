@@ -68,3 +68,8 @@ export function readLabelText(element: Element): string | null {
 export function findKeyShortcuts(target: Element): string | null {
   return target.closest('[aria-keyshortcuts]')?.getAttribute('aria-keyshortcuts') ?? null;
 }
+
+/** Tells whether the browser runs on macOS, where no key opens the context menu. */
+export function isMacBrowser(): boolean {
+  return navigator.platform.startsWith('Mac');
+}

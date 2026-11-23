@@ -10,7 +10,11 @@ for (const scenarioName of new Set(cases.map((testCase) => testCase.titles[0])))
     for (const testCase of cases.filter((item) => item.titles[0] === scenarioName)) {
       test(testCase.titles[1], async () => {
         const testInfo = test.info();
-        const { expected } = testCase.case;
+        // The inner run uses a browser on this machine, so this machine tells which one applies.
+        const expected =
+          process.platform === 'darwin' && testCase.case.expectedOnMac
+            ? testCase.case.expectedOnMac
+            : testCase.case.expected;
         const result = readInnerResult(testCase.group, testCase.case.e2e);
         if (result.tracePath) {
           await testInfo.attach('trace', {
